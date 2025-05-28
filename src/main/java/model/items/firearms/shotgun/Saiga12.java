@@ -19,4 +19,9 @@ public class Saiga12 extends Shotgun{
     public double getReloadTime() {
         return 5.6;
     }
+
+    @Override
+    public double getSpread_Amount() {
+        return 0.035;
+    }
 }

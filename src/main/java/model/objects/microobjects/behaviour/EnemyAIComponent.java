@@ -17,7 +17,11 @@ public class EnemyAIComponent extends Component {
 
     @Override
     public void onAdded() {
-        player = FXGL.getGameWorld().getSingleton(EntityType.PLAYER);
+        try {
+            player = FXGL.getGameWorld().getSingleton(EntityType.PLAYER);
+        } catch (Exception e) {
+            player = null;
+        }
         creature = entity.getComponents().stream()
                 .filter(Creature.class::isInstance)
                 .map(Creature.class::cast)
@@ -35,17 +39,18 @@ public class EnemyAIComponent extends Component {
                     .orElse(null);
             return;
         }
+        if (creature.isDead()){
+            return;
+        }
 
         // Наведення
         Point2D playerPos = player.getPosition();
         Point2D enemyPos = entity.getCenter();
 
-        double angle = Math.toDegrees(Math.atan2(
-                playerPos.getY() - enemyPos.getY(),
-                playerPos.getX() - enemyPos.getX()
-        ));
-
-        entity.setRotation(angle);
+//        double angle = Math.toDegrees(Math.atan2(
+//                playerPos.getY() - enemyPos.getY(),
+//                playerPos.getX() - enemyPos.getX()
+//        ));
 
         // Стрільба
         creature.fire(playerPos);
