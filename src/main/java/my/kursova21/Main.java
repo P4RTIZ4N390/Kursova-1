@@ -1,7 +1,6 @@
 package my.kursova21;
 
 import com.almasb.fxgl.entity.Entity;
-import javafx.geometry.Point2D;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.macroobjects.Cave;
@@ -22,7 +21,7 @@ public class Main {
     static Soldier soldier = new Soldier();
     protected Recruit recruit =new Recruit();
 
-    private final static ArrayList<Creature> creatures = new ArrayList<>();
+    private final static ArrayList<MicroObjectAbstract> MICRO_OBJECT_ABSTRACTS = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -30,10 +29,10 @@ public class Main {
         Cultist p=new Cultist();
         System.out.println("Початок роботи.");
         int command=0;
-        creatures.add(soldier);
-        creatures.add(p);
-        creatures.add(new Soldier());
-        creatures.add(main.recruit);
+        MICRO_OBJECT_ABSTRACTS.add(soldier);
+        MICRO_OBJECT_ABSTRACTS.add(p);
+        MICRO_OBJECT_ABSTRACTS.add(new Soldier());
+        MICRO_OBJECT_ABSTRACTS.add(main.recruit);
 //        creatures.add(new Chest("chest"));
 //        creatures.add(new Chest("Guardian"));
         cave.loadCreatures();
@@ -52,24 +51,25 @@ public class Main {
                     int object1=ConsoleHelper.readInt();
                     ConsoleHelper.writeMessage("Оберіть другий об'єкт для взаємодій");
                     int object2=ConsoleHelper.readInt();
-                    Creature creature1=switch (object1){
+                    MicroObjectAbstract microObjectAbstract1 =switch (object1){
                         case 1-> soldier;
                         case 2-> main.recruit;
                         case 3->p;
                         default -> null;
                     };
-                    Creature creature2=switch (object2){
+                    MicroObjectAbstract microObjectAbstract2 =switch (object2){
                         case 1-> soldier;
                         case 2-> main.recruit;
                         case 3->p;
                         default -> null;
                     };
-                    if (creature1==null||creature2==null||creature1.equals(creature2)) {
+                    if (microObjectAbstract1 ==null|| microObjectAbstract2 ==null|| microObjectAbstract1.equals(microObjectAbstract2)) {
                         ConsoleHelper.writeMessage("Це ті самі створіння,або якісь дані введено не коректно");
                         return;
-                    }creature1.takeDamage(creature2);
+                    }
+                    microObjectAbstract1.takeDamage(microObjectAbstract2);
                 }
-                case 8->main.printObjects(creatures);
+                case 8->main.printObjects(MICRO_OBJECT_ABSTRACTS);
                 case 9->main.printCreatureFromArray();
                 case 10->main.sortCreatures();
                 case 11->main.copyCreatureToArray();
@@ -135,7 +135,7 @@ public class Main {
         changeObject(recruit);
     }
 
-    public void changeObject(Creature object){
+    public void changeObject(MicroObjectAbstract object){
         ConsoleHelper.writeMessage("Введіть ім'я");
         object.setCreatureName(ConsoleHelper.readString());
         ConsoleHelper.writeMessage("Введіть ціле число здоров'я");
@@ -153,53 +153,53 @@ public class Main {
         ConsoleHelper.writeSeparator();
     }
 
-    public void printObjects(ArrayList<Creature> creatures){
+    public void printObjects(ArrayList<MicroObjectAbstract> microObjectAbstracts){
         ConsoleHelper.writeMessage("Вміст масиву: ");
-        creatures.forEach(c->ConsoleHelper.writeMessage(c.toString()));
+        microObjectAbstracts.forEach(c->ConsoleHelper.writeMessage(c.toString()));
         ConsoleHelper.writeSeparator();
     }
 
     public void printCreatureFromArray(){
         ConsoleHelper.writeMessage("Введіть номер обєкта");
         int index=ConsoleHelper.readInt();
-        if (index>=creatures.size()||index<0){
-            if (index>=creatures.size())
+        if (index>= MICRO_OBJECT_ABSTRACTS.size()||index<0){
+            if (index>= MICRO_OBJECT_ABSTRACTS.size())
                 ConsoleHelper.writeMessage("Некоректне число,воно більше за розміри масиву.");
             else ConsoleHelper.writeMessage("Некоректне число,воно від'ємне.");
             ConsoleHelper.writeSeparator();
             return;
         }
-        ConsoleHelper.writeMessage(creatures.get(index).toString());
+        ConsoleHelper.writeMessage(MICRO_OBJECT_ABSTRACTS.get(index).toString());
         ConsoleHelper.writeSeparator();
     }
 
-    public Creature getCreatureFromArray(){
+    public MicroObjectAbstract getCreatureFromArray(){
         ConsoleHelper.writeMessage("Введіть номер обєкта");
         int index=ConsoleHelper.readInt();
-        if (index>=creatures.size()||index<0){
-            if (index>=creatures.size())
+        if (index>= MICRO_OBJECT_ABSTRACTS.size()||index<0){
+            if (index>= MICRO_OBJECT_ABSTRACTS.size())
                 ConsoleHelper.writeMessage("Некоректне число,воно більше за розміри масиву.");
             else ConsoleHelper.writeMessage("Некоректне число,воно від'ємне.");
             ConsoleHelper.writeSeparator();
             return  null;
         }
-        return creatures.get(index);
+        return MICRO_OBJECT_ABSTRACTS.get(index);
     }
 
     public void copyCreatureToArray(){
-        Creature object1;
+        MicroObjectAbstract object1;
         try {
-            object1 = (Creature) getCreatureFromArray().clone();
+            object1 = (MicroObjectAbstract) getCreatureFromArray().clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
         object1.setCreatureName(object1.getCreatureName()+"-копія");
-        creatures.add(object1);
+        MICRO_OBJECT_ABSTRACTS.add(object1);
 
     }
 
     public void sortCreatures(){
-        creatures.sort(Creature::compareTo);
+        MICRO_OBJECT_ABSTRACTS.sort(MicroObjectAbstract::compareTo);
         ConsoleHelper.writeMessage("Масив відсортовано.");
     }
 
@@ -218,16 +218,16 @@ public class Main {
                 String name = ConsoleHelper.readString();
 
                 // Сортуємо
-                creatures.sort(Comparator.comparing(Creature::getCreatureName));
+                MICRO_OBJECT_ABSTRACTS.sort(Comparator.comparing(MicroObjectAbstract::getCreatureName));
 
                 // Створюємо тимчасовий об'єкт
-                Creature temp = getTempCreature(name);
+                MicroObjectAbstract temp = getTempCreature(name);
 
                 // Пошук
                 int result = Arrays.binarySearch(
-                        creatures.toArray(new Creature[0]),
+                        MICRO_OBJECT_ABSTRACTS.toArray(new MicroObjectAbstract[0]),
                         temp,
-                        Comparator.comparing(Creature::getCreatureName)
+                        Comparator.comparing(MicroObjectAbstract::getCreatureName)
                 );
 
                 if (result >= 0) {
@@ -235,14 +235,14 @@ public class Main {
 
                     // Факультативне: знайти всі збіги
                     int left = result;
-                    while (left - 1 >= 0 && creatures.get(left - 1).getCreatureName().equals(name)) left--;
+                    while (left - 1 >= 0 && MICRO_OBJECT_ABSTRACTS.get(left - 1).getCreatureName().equals(name)) left--;
 
                     int right = result;
-                    while (right + 1 < creatures.size() && creatures.get(right + 1).getCreatureName().equals(name)) right++;
+                    while (right + 1 < MICRO_OBJECT_ABSTRACTS.size() && MICRO_OBJECT_ABSTRACTS.get(right + 1).getCreatureName().equals(name)) right++;
 
                     ConsoleHelper.writeMessage("Усі збіги на позиціях:");
                     for (int i = left; i <= right; i++) {
-                        ConsoleHelper.writeMessage("Індекс " + i + ": " + creatures.get(i));
+                        ConsoleHelper.writeMessage("Індекс " + i + ": " + MICRO_OBJECT_ABSTRACTS.get(i));
                     }
 
                 } else {
@@ -254,28 +254,28 @@ public class Main {
                 ConsoleHelper.writeMessage("Уведіть значення здоров’я:");
                 int health = ConsoleHelper.readInt();
 
-                creatures.sort(Comparator.comparingInt(Creature::getHealth));
+                MICRO_OBJECT_ABSTRACTS.sort(Comparator.comparingInt(MicroObjectAbstract::getHealth));
 
-                Creature temp = getTempCreatureWithHealth(health);
+                MicroObjectAbstract temp = getTempCreatureWithHealth(health);
 
                 int result = Arrays.binarySearch(
-                        creatures.toArray(new Creature[0]),
+                        MICRO_OBJECT_ABSTRACTS.toArray(new MicroObjectAbstract[0]),
                         temp,
-                        Comparator.comparingInt(Creature::getHealth)
+                        Comparator.comparingInt(MicroObjectAbstract::getHealth)
                 );
 
                 if (result >= 0) {
                     ConsoleHelper.writeMessage("Знайдено на позиції: " + result);
 
                     int left = result;
-                    while (left - 1 >= 0 && creatures.get(left - 1).getHealth() == health) left--;
+                    while (left - 1 >= 0 && MICRO_OBJECT_ABSTRACTS.get(left - 1).getHealth() == health) left--;
 
                     int right = result;
-                    while (right + 1 < creatures.size() && creatures.get(right + 1).getHealth() == health) right++;
+                    while (right + 1 < MICRO_OBJECT_ABSTRACTS.size() && MICRO_OBJECT_ABSTRACTS.get(right + 1).getHealth() == health) right++;
 
                     ConsoleHelper.writeMessage("Усі збіги:");
                     for (int i = left; i <= right; i++) {
-                        ConsoleHelper.writeMessage("Індекс " + i + ": " + creatures.get(i));
+                        ConsoleHelper.writeMessage("Індекс " + i + ": " + MICRO_OBJECT_ABSTRACTS.get(i));
                     }
                 } else {
                     ConsoleHelper.writeMessage("Об’єкт не знайдено.");
@@ -286,28 +286,28 @@ public class Main {
                 ConsoleHelper.writeMessage("Уведіть значення броні:");
                 double armor = ConsoleHelper.readDouble();
 
-                creatures.sort(Comparator.comparingDouble(Creature::getArmor));
+                MICRO_OBJECT_ABSTRACTS.sort(Comparator.comparingDouble(MicroObjectAbstract::getArmor));
 
-                Creature temp = getTempCreatureWithArmor(armor);
+                MicroObjectAbstract temp = getTempCreatureWithArmor(armor);
 
                 int result = Arrays.binarySearch(
-                        creatures.toArray(new Creature[0]),
+                        MICRO_OBJECT_ABSTRACTS.toArray(new MicroObjectAbstract[0]),
                         temp,
-                        Comparator.comparingDouble(Creature::getArmor)
+                        Comparator.comparingDouble(MicroObjectAbstract::getArmor)
                 );
 
                 if (result >= 0) {
                     ConsoleHelper.writeMessage("Знайдено на позиції: " + result);
 
                     int left = result;
-                    while (left - 1 >= 0 && creatures.get(left - 1).getArmor() == armor) left--;
+                    while (left - 1 >= 0 && MICRO_OBJECT_ABSTRACTS.get(left - 1).getArmor() == armor) left--;
 
                     int right = result;
-                    while (right + 1 < creatures.size() && creatures.get(right + 1).getArmor() == armor) right++;
+                    while (right + 1 < MICRO_OBJECT_ABSTRACTS.size() && MICRO_OBJECT_ABSTRACTS.get(right + 1).getArmor() == armor) right++;
 
                     ConsoleHelper.writeMessage("Усі збіги:");
                     for (int i = left; i <= right; i++) {
-                        ConsoleHelper.writeMessage("Індекс " + i + ": " + creatures.get(i));
+                        ConsoleHelper.writeMessage("Індекс " + i + ": " + MICRO_OBJECT_ABSTRACTS.get(i));
                     }
                 } else {
                     ConsoleHelper.writeMessage("Об’єкт не знайдено.");
@@ -317,10 +317,10 @@ public class Main {
     }
 
     @NotNull
-    private static Creature getTempCreatureWithArmor(double armor) {
-        Creature temp = new Creature() {
+    private static MicroObjectAbstract getTempCreatureWithArmor(double armor) {
+        MicroObjectAbstract temp = new MicroObjectAbstract() {
             @Override public String toString() { return "Temp"; }
-            @Override public void takeDamage(Creature creature) {}
+            @Override public void takeDamage(MicroObjectAbstract creature) {}
             @Override public void getDamage(int damage) {}
             @Override public void talk() {}
             @Override public void print() {}
@@ -344,12 +344,12 @@ public class Main {
     }
 
     @NotNull
-    private static Creature getTempCreature(String name) {
-        Creature temp = new Creature() {
+    private static MicroObjectAbstract getTempCreature(String name) {
+        MicroObjectAbstract temp = new MicroObjectAbstract() {
             @Override
             public String toString() { return "Temp"; }
             @Override
-            public void takeDamage(Creature creature) {}
+            public void takeDamage(MicroObjectAbstract creature) {}
             @Override
             public void getDamage(int damage) {}
             @Override
@@ -377,10 +377,10 @@ public class Main {
     }
 
     @NotNull
-    private static Creature getTempCreatureWithHealth(int health) {
-        Creature temp = new Creature() {
+    private static MicroObjectAbstract getTempCreatureWithHealth(int health) {
+        MicroObjectAbstract temp = new MicroObjectAbstract() {
             @Override public String toString() { return "Temp"; }
-            @Override public void takeDamage(Creature creature) {}
+            @Override public void takeDamage(MicroObjectAbstract creature) {}
             @Override public void getDamage(int damage) {}
             @Override public void talk() {}
             @Override public void print() {}
@@ -406,9 +406,9 @@ public class Main {
         ConsoleHelper.writeMessage("Уведіть скільки шкоди завдати:");
         int damage = ConsoleHelper.readInt();
 
-        Creature temp = new Creature() {
+        MicroObjectAbstract temp = new MicroObjectAbstract() {
             @Override public String toString() { return "Temp"; }
-            @Override public void takeDamage(Creature creature) {
+            @Override public void takeDamage(MicroObjectAbstract creature) {
                 creature.getDamage(damage);
                 ConsoleHelper.writeMessage("Завдано шкоди "+creature);
                 ConsoleHelper.writeSeparator();
@@ -431,7 +431,7 @@ public class Main {
             }
         };
 
-        creatures.forEach(temp::takeDamage);
+        MICRO_OBJECT_ABSTRACTS.forEach(temp::takeDamage);
     }
 
     public void commandDivideByParameter(){
@@ -449,28 +449,28 @@ public class Main {
                 return;
             }
         }
-        creatures.removeIf(creature -> creature.getType() == entityType);
+        MICRO_OBJECT_ABSTRACTS.removeIf(creature -> creature.getType() == entityType);
     }
 
     public void addToCave(){
-        Creature creature = getNewCreature();
-        if (creature==null) return;
-        cave.getCreatures().add(creature);
+        MicroObjectAbstract microObjectAbstract = getNewCreature();
+        if (microObjectAbstract ==null) return;
+        cave.getCreatures().add(microObjectAbstract);
     }
 
     public void addToCrypt(){
-        Creature creature = getNewCreature();
-        if (creature==null) return;
-        crypt.getCreatures().add(creature);
+        MicroObjectAbstract microObjectAbstract = getNewCreature();
+        if (microObjectAbstract ==null) return;
+        crypt.getCreatures().add(microObjectAbstract);
     }
 
     public void addToCurrentArray(){
-        Creature creature = getNewCreature();
-        if (creature==null) return;
-        creatures.add(creature);
+        MicroObjectAbstract microObjectAbstract = getNewCreature();
+        if (microObjectAbstract ==null) return;
+        MICRO_OBJECT_ABSTRACTS.add(microObjectAbstract);
     }
 
-    public Creature getNewCreature(){
+    public MicroObjectAbstract getNewCreature(){
         ConsoleHelper.writeMessage("Введіть ,яке нове створіння ви хочете створити:");
         ConsoleHelper.writeMessage("""
                 1 - Рекрут
@@ -522,7 +522,7 @@ public class Main {
 
     public void printArrays(){
         ConsoleHelper.writeMessage("Поточний масив:");
-        creatures.forEach(c->ConsoleHelper.writeMessage(c.toString()));
+        MICRO_OBJECT_ABSTRACTS.forEach(c->ConsoleHelper.writeMessage(c.toString()));
         ConsoleHelper.writeSeparator();
         ConsoleHelper.writeMessage("Печери:");
         cave.getCreatures().forEach(c->ConsoleHelper.writeMessage(c.toString()));
@@ -532,26 +532,26 @@ public class Main {
         ConsoleHelper.writeSeparator();
     }
 
-    public Creature getCreatureFromArrays(){
+    public MicroObjectAbstract getCreatureFromArrays(){
         ConsoleHelper.writeMessage("""
                 Виберіть з якого масиву взяти:
                 1 - Поточний масив
                 2 - З масиву макрооб'єкта Печера
                 3 - З масиву макрооб'єкта Склеп
                 """);
-        ArrayList<Creature> creatures=new ArrayList<>();
+        ArrayList<MicroObjectAbstract> microObjectAbstracts =new ArrayList<>();
         int choice = ConsoleHelper.readInt();
         switch (choice){
-            case 1 ->creatures=Main.creatures;
-            case 2 ->creatures=cave.getCreatures();
-            case 3 ->creatures=crypt.getCreatures();
+            case 1 -> microObjectAbstracts =Main.MICRO_OBJECT_ABSTRACTS;
+            case 2 -> microObjectAbstracts =cave.getCreatures();
+            case 3 -> microObjectAbstracts =crypt.getCreatures();
         }
         ConsoleHelper.writeSeparator();
-        creatures.forEach(c->ConsoleHelper.writeMessage(c.toString()));
+        microObjectAbstracts.forEach(c->ConsoleHelper.writeMessage(c.toString()));
         ConsoleHelper.writeSeparator();
         ConsoleHelper.writeMessage("Введіть позицію створіння ,яке отримати:");
         try {
-            return creatures.get(ConsoleHelper.readInt());
+            return microObjectAbstracts.get(ConsoleHelper.readInt());
         }catch (IndexOutOfBoundsException e){
             ConsoleHelper.writeMessage("Ви ввели число більше за розміри масиву або менше 0 ,тому буде повернуто null.");
         }
@@ -559,14 +559,14 @@ public class Main {
     }
 
     public void interactionOfTwoCreatures(){
-        Creature creature1 = getCreatureFromArrays();
-        Creature creature2 = getCreatureFromArrays();
-        int health1=creature1.getHealth();
-        int health2=creature2.getHealth();
-        creature1.takeDamage(creature2);
-        creature2.takeDamage(creature1);
-        ConsoleHelper.writeMessage("Здоровя перед завданням шкоди першого : "+health1+",і після "+creature1.getHealth());
-        ConsoleHelper.writeMessage("Здоровя перед завданням шкоди першого : "+health2+",і після "+creature2.getHealth());
+        MicroObjectAbstract microObjectAbstract1 = getCreatureFromArrays();
+        MicroObjectAbstract microObjectAbstract2 = getCreatureFromArrays();
+        int health1= microObjectAbstract1.getHealth();
+        int health2= microObjectAbstract2.getHealth();
+        microObjectAbstract1.takeDamage(microObjectAbstract2);
+        microObjectAbstract2.takeDamage(microObjectAbstract1);
+        ConsoleHelper.writeMessage("Здоровя перед завданням шкоди першого : "+health1+",і після "+ microObjectAbstract1.getHealth());
+        ConsoleHelper.writeMessage("Здоровя перед завданням шкоди першого : "+health2+",і після "+ microObjectAbstract2.getHealth());
         ConsoleHelper.writeSeparator();
     }
 
@@ -577,12 +577,12 @@ public class Main {
                 2 - З масиву макрооб'єкта Печера
                 3 - З масиву макрооб'єкта Склеп
                 """);
-        ArrayList<Creature> creatures1;
-        ArrayList<Creature> creatures2;
+        ArrayList<MicroObjectAbstract> creatures1;
+        ArrayList<MicroObjectAbstract> creatures2;
         ConsoleHelper.writeMessage("Виберіть перший масив:");
         int choice = ConsoleHelper.readInt();
         switch (choice){
-            case 1 -> creatures1=Main.creatures;
+            case 1 -> creatures1=Main.MICRO_OBJECT_ABSTRACTS;
             case 2 -> creatures1=cave.getCreatures();
             case 3 -> creatures1=crypt.getCreatures();
             default -> {
@@ -595,7 +595,7 @@ public class Main {
         ConsoleHelper.writeMessage("Виберіть другий масив(не можна вибрати однакові масиви):");
         if (choice2 == choice) return;
         switch (choice2){
-            case 1 -> creatures2=Main.creatures;
+            case 1 -> creatures2=Main.MICRO_OBJECT_ABSTRACTS;
             case 2 -> creatures2=cave.getCreatures();
             case 3 -> creatures2=crypt.getCreatures();
             default -> {
@@ -606,14 +606,14 @@ public class Main {
         ConsoleHelper.writeSeparator();
         ConsoleHelper.writeMessage("До взаємодії :");
         printArrays();
-        for (Creature creature : creatures1){
-            for (Creature creature2 : creatures2){
-                creature.takeDamage(creature2);
+        for (MicroObjectAbstract microObjectAbstract : creatures1){
+            for (MicroObjectAbstract microObjectAbstract2 : creatures2){
+                microObjectAbstract.takeDamage(microObjectAbstract2);
             }
         }
-        for (Creature creature : creatures2){
-            for (Creature creature1 : creatures1){
-                creature.takeDamage(creature1);
+        for (MicroObjectAbstract microObjectAbstract : creatures2){
+            for (MicroObjectAbstract microObjectAbstract1 : creatures1){
+                microObjectAbstract.takeDamage(microObjectAbstract1);
             }
         }
         ConsoleHelper.writeSeparator();
@@ -634,33 +634,33 @@ public class Main {
         int count=0;
         switch (choice){
             case 1 -> {
-                for (Creature creature : Main.creatures){if (creature.getHealth()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : Main.MICRO_OBJECT_ABSTRACTS){if (microObjectAbstract.getHealth()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в поточному масиві ,здоров'я яких більше за "+parameter+":"+count);
                 count=0;
-                for (Creature creature : cave.getCreatures()){if (creature.getHealth()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : cave.getCreatures()){if (microObjectAbstract.getHealth()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві печері ,здоров'я яких більше за "+parameter+":"+count);
                 count=0;
-                for (Creature creature : crypt.getCreatures()){if (creature.getHealth()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : crypt.getCreatures()){if (microObjectAbstract.getHealth()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві склеп ,здоров'я яких більше за "+parameter+":"+count);
             }
             case 2 -> {
-                for (Creature creature : Main.creatures){if (creature.getArmor()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : Main.MICRO_OBJECT_ABSTRACTS){if (microObjectAbstract.getArmor()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в поточному масиві ,броня в яких більше за "+parameter+":"+count);
                 count=0;
-                for (Creature creature : cave.getCreatures()){if (creature.getArmor()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : cave.getCreatures()){if (microObjectAbstract.getArmor()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві печера ,броня в яких більше за "+parameter+":"+count);
                 count=0;
-                for (Creature creature : crypt.getCreatures()){if (creature.getArmor()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : crypt.getCreatures()){if (microObjectAbstract.getArmor()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві склеп ,броня в яких більше за "+parameter+":"+count);
             }
             case 3 ->{
-                for (Creature creature : Main.creatures){if (creature.getSpeed()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : Main.MICRO_OBJECT_ABSTRACTS){if (microObjectAbstract.getSpeed()>parameter){count++;}}
                 count=0;
                 ConsoleHelper.writeMessage("Кількість створінь в масиві печер,швидкість в яких більше за "+parameter+":"+count);
-                for (Creature creature : cave.getCreatures()){if (creature.getSpeed()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : cave.getCreatures()){if (microObjectAbstract.getSpeed()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві печер,швидкість в яких більше за "+parameter+":"+count);
                 count=0;
-                for (Creature creature : crypt.getCreatures()){if (creature.getSpeed()>parameter){count++;}}
+                for (MicroObjectAbstract microObjectAbstract : crypt.getCreatures()){if (microObjectAbstract.getSpeed()>parameter){count++;}}
                 ConsoleHelper.writeMessage("Кількість створінь в масиві склеп,швидкість в яких більше за "+parameter+":"+count);
             }
             default -> ConsoleHelper.writeMessage("Ти щось не то увів");
@@ -678,13 +678,13 @@ public class Main {
         int choice = ConsoleHelper.readInt();
         switch (choice){
             case 1 -> {
-                for (int i = 0; i < creatures.size(); i++) {
-                    ConsoleHelper.writeMessage(i+"."+creatures.get(i).toString());
+                for (int i = 0; i < MICRO_OBJECT_ABSTRACTS.size(); i++) {
+                    ConsoleHelper.writeMessage(i+"."+ MICRO_OBJECT_ABSTRACTS.get(i).toString());
                 }
                 ConsoleHelper.writeMessage("Уведіть індекс створіння ,для видалення:");
                 int indexToRemove=ConsoleHelper.readInt();
                 try {
-                    creatures.remove(indexToRemove);
+                    MICRO_OBJECT_ABSTRACTS.remove(indexToRemove);
                 }catch (IndexOutOfBoundsException e){
                     ConsoleHelper.writeMessage("Ви ввели число більше за розміри масиву або менше 0.");
                 }

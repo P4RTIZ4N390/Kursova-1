@@ -17,7 +17,7 @@ import model.items.firearms.pistols.SmithWessonMP57;
 import model.items.firearms.rifles.AR15CrimsonOrderEdition;
 import model.items.inventory.InventoryInteractionView;
 import model.objects.EntityType;
-import model.objects.microobjects.Creature;
+import model.objects.microobjects.MicroObjectAbstract;
 import com.almasb.fxgl.input.UserAction;
 import model.items.inventory.Inventory;
 import model.objects.nanoobjects.chests.BodyOfCrimsonGuardian;
@@ -29,7 +29,7 @@ import utilies.RandomUtil;
 
 import java.util.*;
 
-public class Player extends Creature {//singleton pattern
+public class Player extends MicroObjectAbstract {//singleton pattern
 
     private static Player instance;
     private final InventoryInteractionView interactionView = InventoryInteractionView.getInstance(getInventory());
@@ -138,7 +138,7 @@ public class Player extends Creature {//singleton pattern
     }
 
     @Override
-    public void takeDamage(Creature creature) {
+    public void takeDamage(MicroObjectAbstract microObjectAbstract) {
     }
 
     @Override
@@ -264,8 +264,8 @@ public class Player extends Creature {//singleton pattern
                     return isMouseInside && distance <= RADIUS;
                 })
                 .findFirst().flatMap(entity -> entity.getComponents().stream()
-                        .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                        .map(Creature.class::cast) // Перетворюємо компонент у Creature
+                        .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є Creature
+                        .map(MicroObjectAbstract.class::cast) // Перетворюємо компонент у Creature
                         .findFirst()).ifPresent(creature -> {
                     if (!creature.isDead()) {
                         return;

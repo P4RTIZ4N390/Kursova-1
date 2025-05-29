@@ -51,13 +51,11 @@ public class Lab4 extends GameApplication {
     public final static int WIDTH = 1920;
     public final static int HEIGHT = 1080;
 
-    private Creature buffer;
-    private int amountOfActive = 0;
+    private MicroObjectAbstract buffer;// Буфер для зберігання, мікроОбєктів для подальшого копіювання
+    private int amountOfActive = 0;// Кількість активних мікроОбєктів
 
-    private Label amountOfActiveMicroObjects, bufferLabel;
-    private final List<Label> listOfActiveMicroObjects = new ArrayList<>();
-
-    PhysicsWorld Physic;
+    private Label amountOfActiveMicroObjects, bufferLabel;// Label активних мікроОбєктів і ще один для показу мікроОбєкт, що є в буфері
+    private final List<Label> listOfActiveMicroObjects = new ArrayList<>();// Label активних мікроОбєктів
 
     public static void main(String[] args) {
         launch(args);
@@ -78,9 +76,9 @@ public class Lab4 extends GameApplication {
     protected void initGame() {
         initPhysics();
         FXGL.getGameScene().setCursor(Cursor.DEFAULT);
-        getGameWorld().addEntityFactory(new MicroObjectsFactory()); // Реєструємо фабрику
-        getGameWorld().addEntityFactory(new NanoObjectsFactory());
-        getGameWorld().addEntityFactory(new MacroObjectFactory());
+        getGameWorld().addEntityFactory(new MicroObjectsFactory());// Реєструємо фабрику МікроОбєктів
+        getGameWorld().addEntityFactory(new NanoObjectsFactory());// Реєструємо фабрику наноОбєктів
+        getGameWorld().addEntityFactory(new MacroObjectFactory());// Реєструємо фабрику МакроОбєктів
         spawn("Crypt", 1000, 800);
         spawn("Dormitory", 1200, 800);
         spawn("Cave", WIDTH - 128, HEIGHT - 128);
@@ -88,35 +86,35 @@ public class Lab4 extends GameApplication {
         spawn("Soldier", 500, 500);
         spawn("Cultist", 800, 300);
         setupControls();
-        Physic = FXGL.getPhysicsWorld();
     }
 
+    //Встановлення контролю
     private void setupControls() {
         Input input = FXGL.getInput();
 
         input.addAction(new UserAction("Active MicroObject or DeActivate MicroObject") {
             @Override
             protected void onActionBegin() {
-                Point2D mousePos = FXGL.getInput().getMousePositionWorld();
+                Point2D mousePos = FXGL.getInput().getMousePositionWorld(); // Визначаємо позицію миші на екрані
                 List<Entity> entityList = FXGL.getGameWorld().getEntities()
                         .stream()
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent())// Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    boolean mouseInside = Creature.isIsMouseInside(entity, mousePos);
+                    boolean mouseInside = MicroObjectAbstract.isIsMouseInside(entity, mousePos);// Перевірка чи курсор всередині об'єкта
                     if (mouseInside) {
-                        Creature creature = entity.getComponents().stream()
-                                .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                                .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                        ConsoleHelper.isNull(creature);
-                        if (creature == null) {
-                            break;
-                        }
-                        creature.setActive(!creature.isActive());
-                        ConsoleHelper.writeMessageInLabelInRightCorner(creature + (creature.isActive() ? " тепер активний." : "тепер неактивний."), 7,WIDTH,HEIGHT);
-                        amountOfActive = creature.isActive() ? ++amountOfActive : --amountOfActive;
+                        MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                                .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                                .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                        if (microObjectAbstract == null) {break;}
+                        //Робимо об'єкт активним чи не активним
+                        microObjectAbstract.setActive(!microObjectAbstract.isActive());
+                        //Виводимо повідомлення, щоб стан об'єкта змінився і змінюємо кількість активних мікроОбєктів
+                        ConsoleHelper.writeMessageInLabelInRightCorner(microObjectAbstract + (microObjectAbstract.isActive() ? " тепер активний." : "тепер неактивний."), 7,WIDTH,HEIGHT);
+                        amountOfActive = microObjectAbstract.isActive() ? ++amountOfActive : --amountOfActive;
+                        //Оновлюємо
                         setAmountOfActiveMicroObjects();
-                        updateListOfActiveMicroObjects(creature);
+                        updateListOfActiveMicroObjects(microObjectAbstract);
                         break;
                     }
                 }
@@ -126,21 +124,23 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("CopyAction") {
             @Override
             protected void onActionBegin() {
-                Point2D mousePos = FXGL.getInput().getMousePositionWorld();
+                Point2D mousePos = FXGL.getInput().getMousePositionWorld(); // Визначаємо позицію миші на екрані
                 List<Entity> entityList = FXGL.getGameWorld().getEntities()
                         .stream()
-                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent())// Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    boolean mouseInside = Creature.isIsMouseInside(entity, mousePos);
+                    boolean mouseInside = MicroObjectAbstract.isIsMouseInside(entity, mousePos);
                     if (mouseInside) {
-                        Creature creature = entity.getComponents().stream()
-                                .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                                .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                        assert creature != null;
-                        buffer = creature;
-                        ConsoleHelper.writeMessageInLabelInRightCorner(creature + " скопійовано в буфер.", 8,WIDTH,HEIGHT);
-                        setBufferLabel("Буфер: " + creature);
+                        MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                                .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                                .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                        if (microObjectAbstract == null) {break;}
+                        buffer = microObjectAbstract;
+                        //Виводимо повідомлення
+                        ConsoleHelper.writeMessageInLabelInRightCorner(microObjectAbstract + " скопійовано в буфер.", 8,WIDTH,HEIGHT);
+                        //Змінюємо вміст буфера
+                        setBufferLabel("Буфер: " + microObjectAbstract);
                         break;
                     }
                 }
@@ -155,9 +155,9 @@ public class Lab4 extends GameApplication {
                     return;
                 }
 
-                Point2D mousePos = FXGL.getInput().getMousePositionWorld();
+                Point2D mousePos = FXGL.getInput().getMousePositionWorld();// Визначаємо позицію миші на екрані
 
-                getGameWorld().addEntity(buffer.createCopyAt(mousePos));
+                getGameWorld().addEntity(buffer.createCopyAt(mousePos)); // Створюємо клон, додає до світу на місці курсора
                 ConsoleHelper.writeMessageInLabelInRightCorner("Скопійовано з буфера на місце курсора із" + buffer + ".", 7,WIDTH,HEIGHT);
             }
         }, KeyCode.V, InputModifier.CTRL);
@@ -170,11 +170,11 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        creature.moveRight();
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        microObjectAbstract.moveRight();//Переміщуємо вправо, якщо об'єкт активний
                     }
                 }
             }
@@ -193,11 +193,11 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        creature.moveLeft();
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        microObjectAbstract.moveLeft();//Переміщуємо вліво, якщо об'єкт активний
                     }
                 }
             }
@@ -216,11 +216,11 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        creature.moveUp();
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        microObjectAbstract.moveUp();//Переміщуємо верх, якщо об'єкт активний
                     }
                 }
             }
@@ -239,11 +239,11 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        creature.moveDown();
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        microObjectAbstract.moveDown();//Переміщуємо вниз, якщо об'єкт активний
                     }
                 }
             }
@@ -265,15 +265,16 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent())// Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        FXGL.getGameWorld().removeEntity(entity);
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        FXGL.getGameWorld().removeEntity(entity);//Видаляємо всі активні мікроОбєкти
                     }
                 }
                 ConsoleHelper.writeMessageInLabelInRightCorner("Видалено усі активні мікрообєкти.", 8,WIDTH,HEIGHT);
                 amountOfActive = 0;
+                //Оновлюємо статистику
                 setAmountOfActiveMicroObjects();
                 clearListOfActiveMicroObjects();
             }
@@ -290,14 +291,15 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent())// Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    Creature creature = entity.getComponents().stream()
-                            .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                            .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                    if (creature != null && creature.isActive()) {
-                        creature.setActive(false);
+                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є Creature
+                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
+                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                        microObjectAbstract.setActive(false);//Деактивуємо всі активні мікоОбєкти
                     }
                 }
                 ConsoleHelper.writeMessageInLabelInRightCorner("Деактивовано усі активні мікрообєкти.", 8,WIDTH,HEIGHT);
+                //Оновлюємо статистику
                 amountOfActive = 0;
                 setAmountOfActiveMicroObjects();
                 clearListOfActiveMicroObjects();
@@ -307,9 +309,12 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("insertNewMicroObject") {
             @Override
             protected void onActionBegin() {
-                Creature creature = showCreateCreatureDialog();
-                if (creature == null) return;
-                ConsoleHelper.writeMessageInLabelInRightCorner("Insert New MicroObject ." + creature + ". Координатах x:" + creature.getX() + " y:" + creature.getY(), 8,WIDTH,HEIGHT);
+                MicroObjectAbstract microObjectAbstract = showCreateCreatureDialog();//Отримуємо дані про новий мікроОбєкт
+                if (microObjectAbstract == null) return;
+                //Виводимо повідомлення про створення нового мікроОбєкта
+                ConsoleHelper.writeMessageInLabelInRightCorner("Insert New MicroObject ." + microObjectAbstract
+                        + ". Координатах x:" + microObjectAbstract.getX()
+                        + " y:" + microObjectAbstract.getY(), 8,WIDTH,HEIGHT);
             }
         }, KeyCode.INSERT);
 
@@ -322,23 +327,26 @@ public class Lab4 extends GameApplication {
                         .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent())// Шукаємо тригерні об'єкти
                         .toList();
                 for (Entity entity : entityList) {
-                    boolean mouseInside = Creature.isIsMouseInside(entity, mousePos);
+                    boolean mouseInside = MicroObjectAbstract.isIsMouseInside(entity, mousePos);
                     if (mouseInside) {
-                        Creature creature = entity.getComponents().stream()
-                                .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                                .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-                        if (creature == null) {
-                            MacroObjectAbstract macroObjectAbstract = entity.getComponents().stream()
-                                    .filter(MacroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є Creature
+                        MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                                .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                                .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+                        if (microObjectAbstract == null) {//Якщо не знайшло запускаємо перевірку на макроОбєкт
+                            MacroObjectAbstract macroObjectAbstract = entity.getComponents().stream()// Перевіряємо, чи компонент є MacroObjectAbstract
+                                    .filter(MacroObjectAbstract.class::isInstance) // Перетворюємо компонент у MacroObjectAbstract
                                     .map(MacroObjectAbstract.class::cast).findFirst().orElse(null);
+                            //Якщо не знайшли, або макроОбєкт пустий
                             if (macroObjectAbstract == null || macroObjectAbstract.isEmpty()) {
                                 ConsoleHelper.isNull(macroObjectAbstract);
                                 return;
                             }
+                            //Запускаємо діалог для вибору мікроОбєкта і подальшого витягування
                             pullMicroObjectDialog(macroObjectAbstract);
                             break;
                         }
-                        changeMicroObjectDialog(creature, entity);
+                        //Запускаємо діалог для внесення змін в мікроОбєкті
+                        changeMicroObjectDialog(microObjectAbstract, entity);
                         break;
                     }
                 }
@@ -346,117 +354,137 @@ public class Lab4 extends GameApplication {
         }, MouseButton.SECONDARY);
     }
 
+    /**
+     * @param bufferLabelText текст рядка буфера
+     */
     public void setBufferLabel(String bufferLabelText) {
-        try {
+        //Створення й оновлення рядка буфера
+        try {//Спроба видалити рядок буфера
             FXGL.getGameScene().removeUINode(bufferLabel);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
+        //Створення нового рядка буфера
         bufferLabel = new Label(bufferLabelText);
+        //Встановлення стилю
         bufferLabel.setFont(font);
         bufferLabel.setTextFill(Color.LIGHTGREEN);
+        //Розміщення
         bufferLabel.setLayoutX(0);
         bufferLabel.setLayoutY(0);
+        //Додавання на сцену рядка буфера
         FXGL.getGameScene().addUINode(bufferLabel);
     }
 
     public void setAmountOfActiveMicroObjects() {
-        try {
+        try {//Спроба видалити рядок буфера
             FXGL.getGameScene().removeUINode(amountOfActiveMicroObjects);
         } catch (Exception ignored) {
         }
+        // Створення нового рядку кількості мікроОбєктів
         amountOfActiveMicroObjects = new Label("Кількість активних мікрообєктів: " + amountOfActive + ".");
+        //Встановлення стилю
         amountOfActiveMicroObjects.setFont(font);
         amountOfActiveMicroObjects.setTextFill(Color.LIGHTGREEN);
+        //Розміщення
         amountOfActiveMicroObjects.setLayoutX(0);
         amountOfActiveMicroObjects.setLayoutY(30);
+        //Додавання на сцену рядка кількості мікроОбєктів
         FXGL.getGameScene().addUINode(amountOfActiveMicroObjects);
     }
 
-    public void updateListOfActiveMicroObjects(Creature creature) {
-        listOfActiveMicroObjects.forEach(FXGL.getGameScene()::removeUINode);
-        if (creature.isActive()) {
+    /**Оновлення списку активних мікроОбєктів
+     * @param microObjectAbstract мікроОбєкт який буде додано до списку
+     */
+    public void updateListOfActiveMicroObjects(MicroObjectAbstract microObjectAbstract) {
+        listOfActiveMicroObjects.forEach(FXGL.getGameScene()::removeUINode);//Видаляємо елементи списку
+        if (microObjectAbstract.isActive()) {
             int sizeOfList = listOfActiveMicroObjects.size();
-            if (sizeOfList < 5) {
+            if (sizeOfList < 5) {//Додавання нових елементів списку
                 switch (listOfActiveMicroObjects.size()) {
                     case 0 -> {
-                        listOfActiveMicroObjects.add(new Label(creature.toString()));
+                        listOfActiveMicroObjects.add(new Label(microObjectAbstract.toString()));
                         Label l = listOfActiveMicroObjects.getFirst();
                         l.setLayoutY(50);
                     }
                     case 1 -> {
-                        listOfActiveMicroObjects.add(new Label(creature.toString()));
+                        listOfActiveMicroObjects.add(new Label(microObjectAbstract.toString()));
                         Label l = listOfActiveMicroObjects.get(sizeOfList);
                         l.setLayoutY(70);
                     }
                     case 2 -> {
-                        listOfActiveMicroObjects.add(new Label(creature.toString()));
+                        listOfActiveMicroObjects.add(new Label(microObjectAbstract.toString()));
                         Label l = listOfActiveMicroObjects.get(sizeOfList);
                         l.setLayoutY(90);
                     }
                     case 3 -> {
-                        listOfActiveMicroObjects.add(new Label(creature.toString()));
+                        listOfActiveMicroObjects.add(new Label(microObjectAbstract.toString()));
                         Label l = listOfActiveMicroObjects.get(sizeOfList);
                         l.setLayoutY(110);
                     }
                     case 4 -> {
-                        listOfActiveMicroObjects.add(new Label(creature.toString()));
+                        listOfActiveMicroObjects.add(new Label(microObjectAbstract.toString()));
                         Label l = listOfActiveMicroObjects.get(sizeOfList);
                         l.setLayoutY(130);
                     }
                 }
-            } else {
+            } else {// Інакше видалити останній
                 listOfActiveMicroObjects.removeLast();
-                listOfActiveMicroObjects.addFirst(new Label(creature.toString()));
+                listOfActiveMicroObjects.addFirst(new Label(microObjectAbstract.toString()));//Додати на початок списку новий рядок
                 Label l = listOfActiveMicroObjects.getFirst();
+                // Розмісти його, замість видаленого
                 l.setLayoutY(50);
+                //Всі інші перемістити ніби на один нижче
                 for (int i = 1; i < 5; i++) {
                     listOfActiveMicroObjects.get(i).setLayoutY(50 + 20 * i);
                 }
             }
         } else {
-            ArrayList<String> whatInsideInListOfActiveMicroObjects = new ArrayList<>();
-            for (Label listOfActiveMicroObject : listOfActiveMicroObjects) {
-                whatInsideInListOfActiveMicroObjects.add(listOfActiveMicroObject.getText());
-            }
-            int indexOfFound = whatInsideInListOfActiveMicroObjects.indexOf(creature.toString());
+            //Створюємо список вмісту рядків, за допомогою лямбди
+            List<String> whatInsideInListOfActiveMicroObjects = listOfActiveMicroObjects.stream().
+                    map(Label::getText).
+                    toList();
+            int indexOfFound = whatInsideInListOfActiveMicroObjects.indexOf(microObjectAbstract.toString());
             if (indexOfFound != -1) {
                 listOfActiveMicroObjects.remove(listOfActiveMicroObjects.get(indexOfFound));
             }
-            if (!listOfActiveMicroObjects.isEmpty()) for (int i = 0; i < listOfActiveMicroObjects.size(); i++) {
+            if (!listOfActiveMicroObjects.isEmpty()) // Переміщуєм ,якщо не список не пустий
+                for (int i = 0; i < listOfActiveMicroObjects.size(); i++) {
                 listOfActiveMicroObjects.get(i).setLayoutY(50 + 20 * i);
             }
         }
+        //Додавання рядків до сцени
         listOfActiveMicroObjects.forEach(label -> {
             label.setLayoutX(0);
+            //Встановлення стилю
             label.setTextFill(Color.LIGHTGREEN);
             label.setFont(font);
             FXGL.getGameScene().addUINode(label);
         });
     }
 
+    // Очищення списку рядків активних мікроОбєктів
     private void clearListOfActiveMicroObjects() {
         listOfActiveMicroObjects.forEach(FXGL.getGameScene()::removeUINode);
         listOfActiveMicroObjects.clear();
     }
 
+    // Зупиняє всі активні мікроОбєкти
     public void stopAllActiveMicroObjects() {
         List<Entity> entityList = FXGL.getGameWorld().getEntities()
                 .stream()
                 .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
                 .toList();
         for (Entity entity : entityList) {
-            Creature creature = entity.getComponents().stream()
-                    .filter(Creature.class::isInstance) // Перевіряємо, чи компонент є Creature
-                    .map(Creature.class::cast).findFirst().orElse(null); // Перетворюємо компонент у Creature
-            if (creature != null && creature.isActive()) {
-                creature.stop();
+            MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
+                    .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
+                    .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
+            if (microObjectAbstract != null && microObjectAbstract.isActive()) {
+                microObjectAbstract.stop();
             }
         }
     }
 
-    private Creature showCreateCreatureDialog() {
-        // Отримаємо місце знаходження миші
-        //Point2D mouseLocation = FXGL.getInput().getMousePositionUI();
+    // Діалог створення нового мікроОбєкта
+    private MicroObjectAbstract showCreateCreatureDialog() {
 
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -468,6 +496,7 @@ public class Lab4 extends GameApplication {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
+        //Відступи між елементами
         grid.setPadding(new Insets(20));
 
         // Назва істоти
@@ -496,7 +525,7 @@ public class Lab4 extends GameApplication {
         activeBox.setSelected(false);
         grid.add(activeBox, 1, 4);
 
-        // Приклад RadioButton ()
+        // Чи створити за шаблоном (RadioButton)
         ToggleGroup patternChoice = new ToggleGroup();
         RadioButton patternYes = new RadioButton("Створити за шаблоном:Так");
         RadioButton patternNo = new RadioButton("Створити за шаблоном:Ні");
@@ -539,8 +568,20 @@ public class Lab4 extends GameApplication {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String name = nameField.getText().trim();
-            int x = Integer.parseInt(xField.getText());
-            int y = Integer.parseInt(yField.getText());
+            int x ;
+            int y ;
+            // Перевірка координат
+            try{
+                x = Integer.parseInt(xField.getText());
+                y = Integer.parseInt(yField.getText());
+                if (x<0 || y<0){
+                    ConsoleHelper.writeMessageInLabelInRightCorner("Ви ввели відємне число.",8,WIDTH,HEIGHT);
+                    return null;
+                }
+            } catch (NumberFormatException e) {
+                ConsoleHelper.writeMessageInLabelInRightCorner("Ви ввели не число.",8,WIDTH,HEIGHT);
+                return null;
+            }
             int healt = health.getValue();
             double arm = armor.getValue();
             double max = maxWeight.getValue();
@@ -550,51 +591,53 @@ public class Lab4 extends GameApplication {
             boolean isActive = activeBox.isSelected();
             boolean patternYesSelected = patternYes.isSelected();
 
-            Creature creature;
+            // Перевірка ім'я
+            if (name.isEmpty() && !patternYesSelected) {
+                ConsoleHelper.writeMessageInLabelInRightCorner("Ви ввели пусте ім'я.",8,WIDTH,HEIGHT);
+                return null;
+            }
 
+            MicroObjectAbstract microObjectAbstract;
+
+            // Створюємо мікроОбєкт, в залежно від вибору
             switch (type) {
                 case SOLDIER -> {
-                    if (patternYesSelected) creature = new Soldier();
+                    if (patternYesSelected) microObjectAbstract = new Soldier(x,y);
                     else
-                        creature = new Soldier(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
+                        microObjectAbstract = new Soldier(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
                 }
                 case CULTIST -> {
-                    if (patternYesSelected) creature = new Cultist();
+                    if (patternYesSelected) microObjectAbstract = new Cultist(x,y);
                     else
-                        creature = new Cultist(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
+                        microObjectAbstract = new Cultist(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
                 }
-
                 default -> {
-                    if (patternYesSelected) creature = new Recruit();
+                    if (patternYesSelected) microObjectAbstract = new Recruit(x,y);
                     else
-                        creature = new Recruit(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
+                        microObjectAbstract = new Recruit(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
                 }
             }
 
-            // Створюємо нову сутність через new Entity(...)
-            Entity newEntity = FXGL.entityBuilder()
-                    .at(new Point2D(x, y))
-                    .with(creature) // Додаємо клонований компонент
-                    .build();
-            newEntity.getBoundingBoxComponent().addHitBox(new HitBox(
-                    new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
-                    BoundingShape.box(31, 85) // Розмір хитбоксу
-            ));
+            Entity newEntity = microObjectAbstract.getNewEntity();
 
-            // Наприклад, додаємо властивості через компонент чи проперти (необов’язково)
-            creature.setActive(isActive);  // встановлюємо активність
+            microObjectAbstract.setActive(isActive);  // Встановлюємо активність
 
             // Додаємо істоту у світ гри
             FXGL.getGameWorld().addEntity(newEntity);
-            return creature;
+            return microObjectAbstract;
         }
         return null;
     }
 
-    private void changeMicroObjectDialog(Creature creature, Entity entity) {
+    /**
+     * Діалог зміни мікроОбєкта
+     * @param microObjectAbstract об'єкт який буде змінюватись
+     * @param entity об'єкта який буде змінюватись
+     */
+    private void changeMicroObjectDialog(MicroObjectAbstract microObjectAbstract, Entity entity) {
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Змінити мікроОбєкт " + creature);
+        dialog.setTitle("Змінити мікроОбєкт " + microObjectAbstract);
         // Кнопки OK та Cancel
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -606,7 +649,7 @@ public class Lab4 extends GameApplication {
 
         // Назва істоти
         TextField nameField = new TextField();
-        nameField.setPromptText(creature.getCreatureName());
+        nameField.setPromptText(microObjectAbstract.getCreatureName());
         grid.add(new Label("Ім'я:"), 0, 0);
         grid.add(nameField, 1, 0);
 
@@ -619,24 +662,24 @@ public class Lab4 extends GameApplication {
         grid.add(yField, 1, 2);
 
         // Кількість здоров'я
-        Spinner<Integer> health = new Spinner<>(0, 10000, creature.getHealth());
+        Spinner<Integer> health = new Spinner<>(0, 10000, microObjectAbstract.getHealth());
         grid.add(new Label("Health:"), 0, 3);
         grid.add(health, 1, 3);
 
         // Кількість броні
-        Spinner<Double> armor = new Spinner<>(0, 1000, creature.getArmor(), 0.1);
+        Spinner<Double> armor = new Spinner<>(0, 1000, microObjectAbstract.getArmor(), 0.1);
         grid.add(new Label("Armor:"), 0, 4);
         grid.add(armor, 1, 4);
 
 
         // Кількість досвіду об'єкта
-        Spinner<Double> experience = new Spinner<>(0, 1000, creature.getExperiencePoint(), 0.1);
+        Spinner<Double> experience = new Spinner<>(0, 1000, microObjectAbstract.getExperiencePoint(), 0.1);
         grid.add(new Label("experience:"), 0, 5);
         grid.add(experience, 1, 5);
 
         // Активність (CheckBox)
         CheckBox activeBox = new CheckBox("Активний");
-        activeBox.setSelected(creature.isActive());
+        activeBox.setSelected(microObjectAbstract.isActive());
         grid.add(activeBox, 1, 6);
 
         //Встановлюємо положення на положення миші, діалогу
@@ -644,7 +687,7 @@ public class Lab4 extends GameApplication {
         dialog.setX(position.getX());
         dialog.setY(position.getY());
 
-
+        // Встановлюємо макет
         dialog.getDialogPane().setContent(grid);
 
         // Обробка результату діалогу
@@ -652,7 +695,7 @@ public class Lab4 extends GameApplication {
         Optional<ButtonType> result = dialog.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String name = nameField.getText().isEmpty() ? creature.getCreatureName() : nameField.getText().trim();
+            String name = nameField.getText().isEmpty() ? microObjectAbstract.getCreatureName() : nameField.getText().trim();
             int newX = xField.getValue();
             int newY = yField.getValue();
             int healt = health.getValue();
@@ -662,43 +705,48 @@ public class Lab4 extends GameApplication {
 
             boolean isHaveChanged = false;
 
-            StringBuilder changes = new StringBuilder("Зміни в " + creature + ": \n ");
-            if (!creature.getCreatureName().equals(name)) {
+            //Вивід повідомлення про зміни
+            StringBuilder changes = new StringBuilder("Зміни в " + microObjectAbstract + ": \n ");
+            if (!microObjectAbstract.getCreatureName().equals(name)) {
                 changes.append("Імя змінено на ").append(name).append(" \n ");
                 isHaveChanged = true;
             }
-            if (!(creature.getX() == newX)) {
+            if (!(microObjectAbstract.getX() == newX)) {
                 changes.append("Переміщено на x: ").append(newX).append(" \n ");
                 isHaveChanged = true;
             }
-            if (!(creature.getY() == newY)) {
+            if (!(microObjectAbstract.getY() == newY)) {
                 changes.append("Переміщено на y: ").append(newY).append(" \n ");
                 isHaveChanged = true;
             }
-            if (!(creature.getHealth() == healt)) {
+            if (!(microObjectAbstract.getHealth() == healt)) {
                 changes.append("Кількість здоровя ").append("змінено на ").append(healt).append(" \n ");
                 isHaveChanged = true;
             }
-            if (!(creature.getArmor() == arm)) {
+            if (!(microObjectAbstract.getArmor() == arm)) {
                 changes.append("Кількість броні змінено на ").append(arm).append(" \n ");
                 isHaveChanged = true;
             }
-            if (!(creature.getExperiencePoint() == exper)) {
+            if (!(microObjectAbstract.getExperiencePoint() == exper)) {
                 changes.append("Кількість досвіду змінено на ").append(exper).append(" \n ");
                 isHaveChanged = true;
             }
             PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
             physics.overwritePosition(new Point2D(newX, newY));
 
+            // Вносимо зміни, якщо вони були
             if (isHaveChanged) ConsoleHelper.writeMessageInLabelInRightCorner(changes.toString(), 10,WIDTH,HEIGHT);
-            creature.setCreatureName(name);
-            creature.setHealth(healt);
-            creature.setArmor(arm);
-            creature.setExperiencePoint(exper);
-            creature.setActive(isActive);  // встановлюємо активність
+            microObjectAbstract.setCreatureName(name);
+            microObjectAbstract.setHealth(healt);
+            microObjectAbstract.setArmor(arm);
+            microObjectAbstract.setExperiencePoint(exper);
+            microObjectAbstract.setActive(isActive);  // встановлюємо активність
         }
     }
 
+    /**
+     * @param macroObjectAbstract з якого буде витягнуто макроОбєкт
+     */
     private void pullMicroObjectDialog(MacroObjectAbstract macroObjectAbstract) {
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -713,19 +761,21 @@ public class Lab4 extends GameApplication {
         grid.setPadding(new Insets(15));
 
         // Обгортаємо звичайний список в ObservableList
-        ObservableList<Creature> observableCreatures = FXCollections.observableArrayList(macroObjectAbstract.getCreatures());
-        ListView<Creature> listView = getListCreatureView(observableCreatures);
+        ObservableList<MicroObjectAbstract> observableMicroObjectAbstracts = FXCollections.observableArrayList(macroObjectAbstract.getCreatures());
+        // Створюємо візуальний список
+        ListView<MicroObjectAbstract> listView = getListCreatureView(observableMicroObjectAbstracts);
 
         grid.add(listView, 1, 0);
 
+        // Встановлюємо максимальні розміри вікна списку
         listView.setMaxSize(150, 200);
 
-        //Встановлюємо положення на положення миші, діалогу
-
+        // Встановлюємо положення на положення миші, діалогу
         Point position = getNormalPositionForDialog(300, 375);
         dialog.setX(position.getX());
         dialog.setY(position.getY());
 
+        //Встановлюємо макет в діалог
         dialog.getDialogPane().setContent(grid);
 
         // Обробка результату діалогу
@@ -738,18 +788,23 @@ public class Lab4 extends GameApplication {
         }
     }
 
-    @NotNull
-    private static ListView<Creature> getListCreatureView(ObservableList<Creature> observableCreatures) {
-        ListView<Creature> listView = new ListView<>();
-        listView.setItems(observableCreatures);
+    /**
+     * @param observableMicroObjectAbstracts  список мікроОбєктів
+     * @return список перегляду мікроОбєктів
+     */
+    private static ListView<MicroObjectAbstract> getListCreatureView(@NotNull ObservableList<MicroObjectAbstract> observableMicroObjectAbstracts) {
 
+        ListView<MicroObjectAbstract> listView = new ListView<>();
+        listView.setItems(observableMicroObjectAbstracts);
+
+        // Переробляємо фабрику контейнерів
         listView.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(Creature creature, boolean empty) {
-                super.updateItem(creature, empty);
+            protected void updateItem(MicroObjectAbstract microObjectAbstract, boolean empty) {
+                super.updateItem(microObjectAbstract, empty);
 
                 // Якщо рядок порожній або об’єкт null, нічого не показуємо
-                if (empty || creature == null) {
+                if (empty || microObjectAbstract == null) {
                     setText(null);
                     setGraphic(null);
                 } else {
@@ -758,7 +813,7 @@ public class Lab4 extends GameApplication {
                     row.setAlignment(Pos.CENTER_LEFT);
 
                     // Назва істоти
-                    Text nameText = new Text(creature.toString());
+                    Text nameText = new Text(microObjectAbstract.toString());
                     nameText.setFont(smallFont);
                     nameText.setFill(Color.LIGHTGREEN);
 
@@ -773,30 +828,41 @@ public class Lab4 extends GameApplication {
         return listView;
     }
 
+
     @Override
+    // Ініціалізація фізики
     protected void initPhysics() {
+        //Додавання колізій між макроОбєктом і мікроОбєктом
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.MACROOBJECT, EntityType.ENEMY) {
 
             @Override
             protected void onCollision(Entity macroObject, Entity microObject) {
-                Creature microObjectComponent = microObject.getComponents().stream()
-                        .filter(Creature.class::isInstance)
-                        .map(Creature.class::cast)
+                MicroObjectAbstract microObjectComponent = microObject.getComponents().stream()
+                        .filter(MicroObjectAbstract.class::isInstance)
+                        .map(MicroObjectAbstract.class::cast)
                         .findFirst()
-                        .orElse(null);
+                        .orElse(null);// Отримуємо мікроОбєкт з entity
                 MacroObjectAbstract macroObjectComponent = macroObject.getComponents().stream()
                         .filter(MacroObjectAbstract.class::isInstance)
                         .map(MacroObjectAbstract.class::cast)
                         .findFirst()
-                        .orElse(null);
-                assert macroObjectComponent != null;
-                assert microObjectComponent != null;
+                        .orElse(null);// Отримуємо макроОбєкт з entity
+                // Перевірка на null
+                if (microObjectComponent == null || macroObjectComponent == null) return;
+                // Додавання мікрОбєкт до макроОбєкта
                 macroObjectComponent.addCreature(microObjectComponent);
+                // Видаляємо entity зі світу (ніби він зайшов в макроОбєкт)
                 microObject.removeFromWorld();
+                // Вивід повідомлення, про додавання в макроОбєкт
                 ConsoleHelper.writeMessageInLabelInRightCorner(microObjectComponent + " увійшов в " + macroObjectComponent, 8,WIDTH,HEIGHT);
             }
         });
     }
+
+
+
+
+
 
     /**
      * @param width ширина вікна діалогу

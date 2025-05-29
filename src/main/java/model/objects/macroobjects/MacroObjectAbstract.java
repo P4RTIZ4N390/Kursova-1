@@ -10,7 +10,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import model.TriggerComponent;
-import model.objects.microobjects.Creature;
+import model.objects.microobjects.MicroObjectAbstract;
 
 import java.util.ArrayList;
 
@@ -31,32 +31,32 @@ public abstract class MacroObjectAbstract extends Component {
         loadTexture();
     }
 
-    private final ArrayList<Creature> creatures=new ArrayList<>();
+    private final ArrayList<MicroObjectAbstract> microObjectAbstracts =new ArrayList<>();
 
-    public ArrayList<Creature> getCreatures() {
-        return creatures;
+    public ArrayList<MicroObjectAbstract> getCreatures() {
+        return microObjectAbstracts;
     }
 
     public abstract boolean loadCreatures();
     public abstract void loadTexture();
 
-    public void addCreature(Creature creature) {
-        if (!creatures.isEmpty()){
+    public void addCreature(MicroObjectAbstract microObjectAbstract) {
+        if (!microObjectAbstracts.isEmpty()){
             FXGL.getGameScene().removeUINode(sizeOfCreatures);
         }
-        creatures.add(creature);
-        sizeOfCreatures.setText(String.valueOf(creatures.size()));
+        microObjectAbstracts.add(microObjectAbstract);
+        sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
         FXGL.getGameScene().addUINode(sizeOfCreatures);
     }
 
     public void pullCreature(int index) {
-        Creature creature = creatures.get(index);
-        creatures.remove(index);
+        MicroObjectAbstract microObjectAbstract = microObjectAbstracts.get(index);
+        microObjectAbstracts.remove(index);
         FXGL.getGameScene().removeUINode(sizeOfCreatures);
-        sizeOfCreatures.setText(String.valueOf(creatures.size()));
-        if (!creatures.isEmpty())  FXGL.getGameScene().addUINode(sizeOfCreatures);
-        FXGL.getGameWorld().addEntity(creature.getNewEntity());
-        creature.getPhysics().overwritePosition(new Point2D(x+64, y-89));
+        sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
+        if (!microObjectAbstracts.isEmpty())  FXGL.getGameScene().addUINode(sizeOfCreatures);
+        FXGL.getGameWorld().addEntity(microObjectAbstract.getNewEntity());
+        microObjectAbstract.getPhysics().overwritePosition(new Point2D(x+64, y-89));
     }
 
     public int getX() {
@@ -94,6 +94,6 @@ public abstract class MacroObjectAbstract extends Component {
     }
 
     public boolean isEmpty() {
-        return creatures.isEmpty();
+        return microObjectAbstracts.isEmpty();
     }
 }

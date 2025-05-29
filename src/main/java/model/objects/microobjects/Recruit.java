@@ -15,7 +15,7 @@ import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
-public class Recruit extends Creature{//рекрут
+public class Recruit extends MicroObjectAbstract {//рекрут
 
     private int replicaCount = RandomUtil.getRandomInt(0,2);//я хотів, щоб репліка виводилась випадково
     private final int id;
@@ -31,14 +31,20 @@ public class Recruit extends Creature{//рекрут
         inventory.addItems(new Ammo762mm(),150);
     }
 
+    public Recruit(int x, int y) {
+        this();
+        setX(x);
+        setY(y);
+    }
+
     @Override
     public String toString() {
         return this.getCreatureName()+id+"("+this.getHealth()+")";
     }
 
     @Override
-    public void takeDamage(Creature creature) {//Завдати шкоди
-        creature.getDamage(15);//просто виклик отримання шкоди в об'єкта параметра
+    public void takeDamage(MicroObjectAbstract microObjectAbstract) {//Завдати шкоди
+        microObjectAbstract.getDamage(15);//просто виклик отримання шкоди в об'єкта параметра
     }
 
     @Override
@@ -129,12 +135,12 @@ public class Recruit extends Creature{//рекрут
 
     @Override
     public Entity getNewEntity() {
-        Creature recruit=this;
-
+        MicroObjectAbstract recruit=this;
 
         Entity recruitE = FXGL.entityBuilder()
                 .with(recruit) // додаємо Creature
                 .type(EntityType.ENEMY)
+                .at(getX(),getY())
                 .build();
 
         recruitE.getBoundingBoxComponent().addHitBox(new HitBox(

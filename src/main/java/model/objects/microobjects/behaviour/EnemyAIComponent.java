@@ -6,14 +6,14 @@ import com.almasb.fxgl.entity.component.Component;
 import javafx.geometry.Point2D;
 import jdk.jfr.Enabled;
 import model.objects.EntityType;
-import model.objects.microobjects.Creature;
+import model.objects.microobjects.MicroObjectAbstract;
 
 
 @Enabled
 public class EnemyAIComponent extends Component {
 
     private Entity player;
-    private Creature creature;
+    private MicroObjectAbstract microObjectAbstract;
 
     @Override
     public void onAdded() {
@@ -22,24 +22,24 @@ public class EnemyAIComponent extends Component {
         } catch (Exception e) {
             player = null;
         }
-        creature = entity.getComponents().stream()
-                .filter(Creature.class::isInstance)
-                .map(Creature.class::cast)
+        microObjectAbstract = entity.getComponents().stream()
+                .filter(MicroObjectAbstract.class::isInstance)
+                .map(MicroObjectAbstract.class::cast)
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public void onUpdate(double tpf) {
-        if (player == null || creature == null){
-            creature=entity.getComponents().stream()
-                    .filter(Creature.class::isInstance)
-                    .map(Creature.class::cast)
+        if (player == null || microObjectAbstract == null){
+            microObjectAbstract =entity.getComponents().stream()
+                    .filter(MicroObjectAbstract.class::isInstance)
+                    .map(MicroObjectAbstract.class::cast)
                     .findFirst()
                     .orElse(null);
             return;
         }
-        if (creature.isDead()){
+        if (microObjectAbstract.isDead()){
             return;
         }
 
@@ -53,7 +53,7 @@ public class EnemyAIComponent extends Component {
 //        ));
 
         // Стрільба
-        creature.fire(playerPos);
+        microObjectAbstract.fire(playerPos);
     }
 }
 

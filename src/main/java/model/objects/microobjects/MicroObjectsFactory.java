@@ -34,7 +34,7 @@ public class MicroObjectsFactory implements EntityFactory {
 
     @Spawns("Cultist")
     public Entity spawnCultist(SpawnData data) {
-        Creature cultist=new Cultist();
+        MicroObjectAbstract cultist=new Cultist();
         cultist.setX((int) data.getX());
         cultist.setY((int) data.getY());
         Entity cultistE =FXGL.entityBuilder()
@@ -54,7 +54,7 @@ public class MicroObjectsFactory implements EntityFactory {
     }
     @Spawns("Recruit")
     public Entity spawnRecruit(SpawnData data) {
-        Creature recruit=new Recruit();
+        MicroObjectAbstract recruit=new Recruit();
         recruit.setX((int) data.getX());
         recruit.setY((int) data.getY());
 
@@ -75,7 +75,7 @@ public class MicroObjectsFactory implements EntityFactory {
 
     @Spawns("Soldier")
     public Entity spawnSoldier(SpawnData data) {
-        Creature soldier=new Soldier();
+        MicroObjectAbstract soldier=new Soldier();
         soldier.setX((int) data.getX());
         soldier.setY((int) data.getY());
 

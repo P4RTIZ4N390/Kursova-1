@@ -24,7 +24,7 @@ import utilies.ImageLoader;
 
 import java.util.Objects;
 
-public abstract class Creature extends Component implements Comparable<Creature>,Cloneable {
+public abstract class MicroObjectAbstract extends Component implements Comparable<MicroObjectAbstract>,Cloneable {
 
     public static int MAX_HEIGHT= Lab4.HEIGHT;
     public static int MAX_WIDTH=Lab4.WIDTH;
@@ -58,7 +58,7 @@ public abstract class Creature extends Component implements Comparable<Creature>
 
     protected Direction direction=Direction.RIGHT;
 
-    public Creature(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed,EntityType type) {//true constructor
+    public MicroObjectAbstract(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed, EntityType type) {//true constructor
         super();
         this.creatureName = creatureName;
         this.health = health;
@@ -71,11 +71,11 @@ public abstract class Creature extends Component implements Comparable<Creature>
         this.type = type;
     }
 
-    public Creature() {//task condition
+    public MicroObjectAbstract() {//task condition
         this("Creature",100,5,Inventory.getInventory(50),150,0,0,1,EntityType.ENEMY);
     }
 
-    public Creature(int x, int y) {
+    public MicroObjectAbstract(int x, int y) {
         this("Creature",100,5,Inventory.getInventory(50),150,x,y,1,EntityType.ENEMY);
     }
 
@@ -179,8 +179,8 @@ public abstract class Creature extends Component implements Comparable<Creature>
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Creature creature = (Creature) o;
-        return health == creature.health && Double.compare(experiencePoint, creature.experiencePoint) == 0 && x == creature.x && y == creature.y && Objects.equals(creatureName, creature.creatureName);
+        MicroObjectAbstract microObjectAbstract = (MicroObjectAbstract) o;
+        return health == microObjectAbstract.health && Double.compare(experiencePoint, microObjectAbstract.experiencePoint) == 0 && x == microObjectAbstract.x && y == microObjectAbstract.y && Objects.equals(creatureName, microObjectAbstract.creatureName);
     }
 
     @Override
@@ -204,7 +204,7 @@ public abstract class Creature extends Component implements Comparable<Creature>
     }
 
     public abstract String toString();
-    public abstract void takeDamage(Creature creature);
+    public abstract void takeDamage(MicroObjectAbstract microObjectAbstract);
     public abstract void getDamage(int damage);
     public abstract void talk();
     public abstract void print();
@@ -291,23 +291,23 @@ public abstract class Creature extends Component implements Comparable<Creature>
 
 
     @Override
-    public int compareTo(@NotNull Creature o) {
+    public int compareTo(@NotNull MicroObjectAbstract o) {
         return Double.compare(o.armor, armor)+Double.compare(o.speed,speed)+inventory.compareTo(o.inventory);
     }
 
-    public static int compare(Creature o1, Creature o2) {
+    public static int compare(MicroObjectAbstract o1, MicroObjectAbstract o2) {
         return o1.compareTo(o2);
     }
 
-    public int compareToName(@NotNull Creature o) {
+    public int compareToName(@NotNull MicroObjectAbstract o) {
         return creatureName.compareTo(o.creatureName);
     }
 
-    public int compareToHealth(@NotNull Creature o) {
+    public int compareToHealth(@NotNull MicroObjectAbstract o) {
         return Integer.compare(o.health, health);
     }
 
-    public int compareToArmor(@NotNull Creature o) {
+    public int compareToArmor(@NotNull MicroObjectAbstract o) {
         return Double.compare(o.armor, armor);
     }
 
@@ -337,9 +337,9 @@ public abstract class Creature extends Component implements Comparable<Creature>
         int y=(int) pos.getY();
 
         // Клонуємо компонент, щоб уникнути спільного стану
-        Creature clone;
+        MicroObjectAbstract clone;
         try {
-            clone = (Creature) this.clone();
+            clone = (MicroObjectAbstract) this.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Clone failed", e);
         }

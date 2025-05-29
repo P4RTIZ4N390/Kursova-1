@@ -14,7 +14,7 @@ import utilies.ImageLoader;
 import utilies.RandomUtil;
 
 
-public class Cultist extends Creature{//Окультист
+public class Cultist extends MicroObjectAbstract {//Окультист
 
     private int replicaCount=RandomUtil.getRandomInt(0,2);//я хотів, щоб репліка виводилась випадково
 
@@ -31,14 +31,20 @@ public class Cultist extends Creature{//Окультист
         this("Cultist",200,5.5,Inventory.getInventory(100,new FNP90()), RandomUtil.getRandomExperiencePoint(150),0,0,200);//Вимога задачі
     }
 
+    public Cultist(int x, int y) {
+        this();
+        setX(x);
+        setY(y);
+    }
+
     @Override
     public String toString() {
         return this.getCreatureName()+id+"("+this.getHealth()+")";
     }
 
     @Override
-    public void takeDamage(Creature creature) {//Завдати шкоди
-        creature.getDamage(40);//Просто виклик отримання шкоди в об'єкта параметра
+    public void takeDamage(MicroObjectAbstract microObjectAbstract) {//Завдати шкоди
+        microObjectAbstract.getDamage(40);//Просто виклик отримання шкоди в об'єкта параметра
     }
 
     @Override
@@ -121,10 +127,11 @@ public class Cultist extends Creature{//Окультист
 
     @Override
     public Entity getNewEntity() {
-        Creature cultist=this;
+        MicroObjectAbstract cultist=this;
         Entity cultistE = FXGL.entityBuilder()
                 .with(cultist) // додаємо Creature
                 .type(EntityType.ENEMY)
+                .at(getX(),getY())
                 .build();
 
         cultistE.getBoundingBoxComponent().addHitBox(new HitBox(

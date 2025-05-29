@@ -9,19 +9,17 @@ import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.CollisionHandler;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.physics.PhysicsWorld;
-import javafx.geometry.BoundingBox;
-import javafx.util.Duration;
 import model.objects.EntityType;
 import model.Player;
-import model.objects.microobjects.Creature;
+import model.objects.microobjects.MicroObjectAbstract;
 import model.objects.microobjects.MicroObjectsFactory;
 import model.objects.nanoobjects.NanoObjectsFactory;
 import model.objects.nanoobjects.bullets.Bullet;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameWorld;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
-import static model.objects.microobjects.Creature.MAX_HEIGHT;
-import static model.objects.microobjects.Creature.MAX_WIDTH;
+import static model.objects.microobjects.MicroObjectAbstract.MAX_HEIGHT;
+import static model.objects.microobjects.MicroObjectAbstract.MAX_WIDTH;
 
 public class GameMain extends GameApplication {
     private final static String GAME_TITLE = "Game_Main";
@@ -47,7 +45,7 @@ public class GameMain extends GameApplication {
         createBorders();
         getGameWorld().addEntityFactory(new MicroObjectsFactory()); // Реєструємо фабрику
         getGameWorld().addEntityFactory(new NanoObjectsFactory());
-        Creature player = spawn("Player", 200, 200).getComponent(Player.class);
+        MicroObjectAbstract player = spawn("Player", 200, 200).getComponent(Player.class);
         spawn("Recruit",300, 500);
         spawn("Soldier", 500, 500);
 //        spawn("Chest",500,500);
@@ -73,9 +71,9 @@ public class GameMain extends GameApplication {
                         .map(Bullet.class::cast)
                         .findFirst()
                         .orElse(null);
-                Creature enemyComponent = enemy.getComponents().stream()
-                        .filter(Creature.class::isInstance)
-                        .map(Creature.class::cast)
+                MicroObjectAbstract enemyComponent = enemy.getComponents().stream()
+                        .filter(MicroObjectAbstract.class::isInstance)
+                        .map(MicroObjectAbstract.class::cast)
                         .findFirst()
                         .orElse(null);
 
@@ -95,9 +93,9 @@ public class GameMain extends GameApplication {
                         .map(Bullet.class::cast)
                         .findFirst()
                         .orElse(null);
-                Creature enemyComponent = enemy.getComponents().stream()
-                        .filter(Creature.class::isInstance)
-                        .map(Creature.class::cast)
+                MicroObjectAbstract enemyComponent = enemy.getComponents().stream()
+                        .filter(MicroObjectAbstract.class::isInstance)
+                        .map(MicroObjectAbstract.class::cast)
                         .findFirst()
                         .orElse(null);
 
@@ -110,9 +108,9 @@ public class GameMain extends GameApplication {
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.WALL) {
             @Override
             protected void onCollisionBegin(Entity player, Entity wall) {
-                Creature playerComponent = player.getComponents().stream()
-                        .filter(Creature.class::isInstance)
-                        .map(Creature.class::cast)
+                MicroObjectAbstract playerComponent = player.getComponents().stream()
+                        .filter(MicroObjectAbstract.class::isInstance)
+                        .map(MicroObjectAbstract.class::cast)
                         .findFirst()
                         .orElse(null);
                 assert playerComponent != null;

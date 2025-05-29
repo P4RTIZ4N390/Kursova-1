@@ -13,7 +13,7 @@ import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
-public class Soldier extends Creature{
+public class Soldier extends MicroObjectAbstract {
 
     private int replicaCount =RandomUtil.getRandomInt(0,2);//я хотів, щоб репліка виводилась випадково
 
@@ -31,13 +31,19 @@ public class Soldier extends Creature{
         id=idCounter++;
     }
 
+    public Soldier(int x, int y) {
+        this();
+        setX(x);
+        setY(y);
+    }
+
     @Override
     public String toString() {
         return this.getCreatureName()+id+"("+this.getHealth()+")";
     }
 
     @Override
-    public void takeDamage(Creature creature) {
+    public void takeDamage(MicroObjectAbstract microObjectAbstract) {
 
     }
 
@@ -122,11 +128,12 @@ public class Soldier extends Creature{
 
     @Override
     public Entity getNewEntity() {
-        Creature soldier=this;
+        MicroObjectAbstract soldier=this;
 
         Entity soldierE= FXGL.entityBuilder()
                 .with(soldier)
                 .type(EntityType.ENEMY)
+                .at(getX(),getY())
                 .build();
         soldierE.getBoundingBoxComponent().addHitBox(new HitBox(
                 new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
