@@ -46,6 +46,7 @@ public abstract class MacroObjectAbstract extends Component {
         }
         microObjectAbstracts.add(microObjectAbstract);
         sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
+        microObjectAbstract.setMacroObjectAbstract(this);
         FXGL.getGameScene().addUINode(sizeOfCreatures);
     }
 

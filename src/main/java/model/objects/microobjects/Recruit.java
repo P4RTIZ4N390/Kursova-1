@@ -95,7 +95,6 @@ public class Recruit extends MicroObjectAbstract {//рекрут
         mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25+237);
     }
 
-    @Override
     public void stop() {
         switch (direction) {
             case RIGHT->{
@@ -119,7 +118,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+5);
                 mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25+365);}
         }
-        super.stop();
+        stopPhysic();
     }
 
     @Override
@@ -149,5 +148,9 @@ public class Recruit extends MicroObjectAbstract {//рекрут
         ));
 
         return recruitE;
+    }
+
+    public double getInventoryMax(){
+        return this.getInventory().getMaxWeight();
     }
 }

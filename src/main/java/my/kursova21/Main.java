@@ -326,7 +326,6 @@ public class Main {
             @Override public void print() {}
             @Override public void loadAnimatedTexture() {}
 
-            @Override
             public void stop() {
 
             }
@@ -359,7 +358,6 @@ public class Main {
             @Override
             public void loadAnimatedTexture() {}
 
-            @Override
             public void stop() {
 
             }
@@ -386,7 +384,7 @@ public class Main {
             @Override public void print() {}
             @Override public void loadAnimatedTexture() {}
 
-            @Override
+
             public void stop() {
 
             }
@@ -418,7 +416,6 @@ public class Main {
             @Override public void print() {}
             @Override public void loadAnimatedTexture() {}
 
-            @Override
             public void stop() {
 
             }

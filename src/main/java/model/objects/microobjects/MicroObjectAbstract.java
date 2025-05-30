@@ -18,6 +18,8 @@ import model.items.Item;
 import model.items.firearms.Gun;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
+import model.objects.macroobjects.MacroObjectAbstract;
+import model.objects.macroobjects.typeOfMacroObject;
 import my.kursova21.Lab4;
 import org.jetbrains.annotations.NotNull;
 import utilies.ImageLoader;
@@ -46,6 +48,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected PhysicsComponent physics=new PhysicsComponent();
     protected final int speed;
     private final EntityType type;
+    private MacroObjectAbstract macroObjectAbstract;
 
     private boolean active = false;
 
@@ -209,16 +212,17 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     public abstract void talk();
     public abstract void print();
     public abstract void loadAnimatedTexture();
+    public abstract void stop();
 
 
-    public void stop(){
+    public void stopPhysic(){
         physics.setVelocityX(0);
         physics.setVelocityY(0);
     }
 
     public void moveRight() {
         if (x>=MAX_WIDTH-10){
-            stop();
+            stopPhysic();
             return;
         }
         direction=Direction.RIGHT;
@@ -228,7 +232,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public void moveLeft() {
         if (x<=10){
-            stop();
+            stopPhysic();
             return;
         }
         direction=Direction.LEFT;
@@ -238,7 +242,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public void moveUp() {
         if (y<=5){
-            stop();
+            stopPhysic();
             return;
         }
         direction=Direction.UP;
@@ -248,7 +252,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public void moveDown() {
         if (y>=MAX_HEIGHT-50){
-            stop();
+            stopPhysic();
             return;
         }
         direction=Direction.DOWN;
@@ -363,6 +367,14 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public PhysicsComponent getPhysics() {
         return physics;
+    }
+
+    public MacroObjectAbstract getMacroObjectAbstract() {
+        return macroObjectAbstract;
+    }
+
+    public void setMacroObjectAbstract(MacroObjectAbstract macroObjectAbstract) {
+        this.macroObjectAbstract = macroObjectAbstract;
     }
 }
 

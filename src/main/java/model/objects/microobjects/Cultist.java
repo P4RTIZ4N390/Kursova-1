@@ -14,7 +14,7 @@ import utilies.ImageLoader;
 import utilies.RandomUtil;
 
 
-public class Cultist extends MicroObjectAbstract {//Окультист
+public class Cultist extends Soldier {//Окультист
 
     private int replicaCount=RandomUtil.getRandomInt(0,2);//я хотів, щоб репліка виводилась випадково
 
@@ -22,9 +22,8 @@ public class Cultist extends MicroObjectAbstract {//Окультист
     private static int idCounter = 0;
 
     public Cultist(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed) {//Справжній конструктор
-        super(creatureName, health, armor, inventory, experiencePoint, x, y, speed, EntityType.ENEMY);
+        super(creatureName, health, armor, inventory, experiencePoint, x, y, speed);
         id = idCounter++;
-
     }
 
     public Cultist() {
@@ -117,12 +116,12 @@ public class Cultist extends MicroObjectAbstract {//Окультист
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+27);
                 mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25+320);}
         }
-        super.stop();
+        stopPhysic();
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return new Cultist(getCreatureName(),getHealth(),getArmor(),(Inventory) inventory.clone(),getExperiencePoint(),getX(),getY(),speed);
+    public Object clone() {
+        return new Cultist(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(this.getInventoryMax()),getExperiencePoint(),getX(),getY(),speed);
     }
 
     @Override

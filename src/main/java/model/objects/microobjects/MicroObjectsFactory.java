@@ -48,7 +48,7 @@ public class MicroObjectsFactory implements EntityFactory {
                 BoundingShape.box(32, 82) // Розмір хитбоксу
         ));
 
-        enableHitboxView(cultistE);
+        //enableHitboxView(cultistE);
 
         return cultistE;
     }
@@ -69,7 +69,7 @@ public class MicroObjectsFactory implements EntityFactory {
                 BoundingShape.box(31, 85) // Розмір хитбоксу
         ));
 
-        enableHitboxView(recruitE);
+        //enableHitboxView(recruitE);
         return recruitE;
     }
 
@@ -89,7 +89,7 @@ public class MicroObjectsFactory implements EntityFactory {
                 BoundingShape.box(31, 85) // Розмір хитбоксу
         ));
 
-        enableHitboxView(soldierE);
+        //enableHitboxView(soldierE);
         return soldierE;
     }
 

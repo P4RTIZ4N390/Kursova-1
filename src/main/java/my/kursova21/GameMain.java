@@ -108,9 +108,9 @@ public class GameMain extends GameApplication {
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.WALL) {
             @Override
             protected void onCollisionBegin(Entity player, Entity wall) {
-                MicroObjectAbstract playerComponent = player.getComponents().stream()
-                        .filter(MicroObjectAbstract.class::isInstance)
-                        .map(MicroObjectAbstract.class::cast)
+                Player playerComponent = player.getComponents().stream()
+                        .filter(Player.class::isInstance)
+                        .map(Player.class::cast)
                         .findFirst()
                         .orElse(null);
                 assert playerComponent != null;

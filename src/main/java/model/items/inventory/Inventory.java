@@ -265,4 +265,6 @@ public class Inventory implements Comparable<Inventory>,Cloneable{//клас-м�
     public void clear(){
         items.clear();
     }
+
+
 }

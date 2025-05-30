@@ -89,7 +89,7 @@ public class Lab4 extends GameApplication {
     }
 
     //Встановлення контролю
-    private void setupControls() {
+    protected void setupControls() {
         Input input = FXGL.getInput();
 
         input.addAction(new UserAction("Active MicroObject or DeActivate MicroObject") {

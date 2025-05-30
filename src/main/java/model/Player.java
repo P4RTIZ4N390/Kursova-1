@@ -180,7 +180,7 @@ public class Player extends MicroObjectAbstract {//singleton pattern
         mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25+50);
     }
 
-    @Override
+
     public void stop() {
         switch (direction) {
             case RIGHT->{
@@ -204,7 +204,7 @@ public class Player extends MicroObjectAbstract {//singleton pattern
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+32);
                 mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25);}
         }
-        super.stop();
+        stopPhysic();
     }
 
     @Override

@@ -1,19 +1,13 @@
 package model.objects.microobjects;
 
-import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.physics.BoundingShape;
-import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.texture.AnimatedTexture;
-import javafx.geometry.Point2D;
 import model.items.firearms.smg.FNP90;
 import model.items.inventory.Inventory;
-import model.objects.EntityType;
 import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
-public class Soldier extends MicroObjectAbstract {
+public class Soldier extends Recruit {
 
     private int replicaCount =RandomUtil.getRandomInt(0,2);//я хотів, щоб репліка виводилась випадково
 
@@ -25,7 +19,8 @@ public class Soldier extends MicroObjectAbstract {
     }
 
     public Soldier(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed) {
-        super(creatureName, health, armor, inventory, experiencePoint, x, y, speed, EntityType.ENEMY);
+        super(creatureName, health, armor, inventory, experiencePoint, x, y, speed);
+        getInventory().clear();
         getInventory().addItem(new FNP90());
         setCurrentItem("FN P90");
         id=idCounter++;
@@ -118,29 +113,11 @@ public class Soldier extends MicroObjectAbstract {
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+37);
                 mainTexture.setTranslateY(-mainTexture.getImage().getWidth() * 0.25+265);}
         }
-        super.stop();
+        stopPhysic();
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return new Soldier(getCreatureName(),getHealth(),getArmor(),(Inventory) inventory.clone(),getExperiencePoint(),getX(),getY(),speed);
+    public Object clone() {
+        return new Soldier(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(this.getInventoryMax()),getExperiencePoint(),getX(),getY(),speed);
     }
-
-    @Override
-    public Entity getNewEntity() {
-        MicroObjectAbstract soldier=this;
-
-        Entity soldierE= FXGL.entityBuilder()
-                .with(soldier)
-                .type(EntityType.ENEMY)
-                .at(getX(),getY())
-                .build();
-        soldierE.getBoundingBoxComponent().addHitBox(new HitBox(
-                new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
-                BoundingShape.box(31, 85) // Розмір хитбоксу
-        ));
-        return soldierE;
-    }
-
-
 }
