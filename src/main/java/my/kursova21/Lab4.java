@@ -448,8 +448,8 @@ public class Lab4 extends GameApplication {
             }
             if (!listOfActiveMicroObjects.isEmpty()) // Переміщуєм ,якщо не список не пустий
                 for (int i = 0; i < listOfActiveMicroObjects.size(); i++) {
-                listOfActiveMicroObjects.get(i).setLayoutY(50 + 20 * i);
-            }
+                    listOfActiveMicroObjects.get(i).setLayoutY(50 + 20 * i);
+                }
         }
         //Додавання рядків до сцени
         listOfActiveMicroObjects.forEach(label -> {
