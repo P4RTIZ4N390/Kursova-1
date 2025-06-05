@@ -11,7 +11,6 @@ import utilies.ImageLoader;
 public class Crypt extends MacroObjectAbstract{
     public Crypt(int x, int y) {
         super(x, y);
-        loadCreatures();
     }
 
     @Override

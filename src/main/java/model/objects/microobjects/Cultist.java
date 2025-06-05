@@ -23,6 +23,9 @@ public class Cultist extends Soldier {//Окультист
 
     public Cultist(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed) {//Справжній конструктор
         super(creatureName, health, armor, inventory, experiencePoint, x, y, speed);
+        getInventory().clear();
+        getInventory().addItem(new FNP90());
+        setCurrentItem("FN P90");
         id = idCounter++;
     }
 
@@ -118,6 +121,8 @@ public class Cultist extends Soldier {//Окультист
         }
         stopPhysic();
     }
+
+
 
     @Override
     public Object clone() {

@@ -207,6 +207,7 @@ public class Player extends MicroObjectAbstract {//singleton pattern
         stopPhysic();
     }
 
+
     @Override
     public void moveRight() {
         if (mainTexture.getAnimationChannel() != animWalkRight) {
@@ -464,4 +465,6 @@ public class Player extends MicroObjectAbstract {//singleton pattern
     public void onUpdate(double tpf) {
         super.onUpdate(tpf);
     }
+
+
 }

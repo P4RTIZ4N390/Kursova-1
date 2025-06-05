@@ -129,7 +129,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
 
     @Override
     public Object clone(){
-        return new Recruit(getCreatureName(),getHealth(),getArmor(),inventory.clone(),getExperiencePoint(),getX(),getY(),speed);
+        return new Recruit(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(getInventoryMax(),new AKM()),getExperiencePoint(),getX(),getY(),speed);
     }
 
     @Override

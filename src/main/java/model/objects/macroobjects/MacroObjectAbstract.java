@@ -11,9 +11,13 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import model.TriggerComponent;
 import model.objects.microobjects.MicroObjectAbstract;
+import utilies.ConsoleHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static my.kursova21.Lab4.HEIGHT;
+import static my.kursova21.Lab4.WIDTH;
 import static utilies.ConsoleHelper.font;
 
 public abstract class MacroObjectAbstract extends Component {
@@ -29,11 +33,12 @@ public abstract class MacroObjectAbstract extends Component {
         this.x = x;
         this.y = y;
         loadTexture();
+        loadCreatures();
     }
 
-    private final ArrayList<MicroObjectAbstract> microObjectAbstracts =new ArrayList<>();
+    private final List<MicroObjectAbstract> microObjectAbstracts =new ArrayList<>();
 
-    public ArrayList<MicroObjectAbstract> getCreatures() {
+    public List<MicroObjectAbstract> getCreatures() {
         return microObjectAbstracts;
     }
 
@@ -58,6 +63,15 @@ public abstract class MacroObjectAbstract extends Component {
         if (!microObjectAbstracts.isEmpty())  FXGL.getGameScene().addUINode(sizeOfCreatures);
         FXGL.getGameWorld().addEntity(microObjectAbstract.getNewEntity());
         microObjectAbstract.getPhysics().overwritePosition(new Point2D(x+64, y-89));
+    }
+
+    public void pullCreature(MicroObjectAbstract microObjectAbstract) {
+        int index = microObjectAbstracts.indexOf(microObjectAbstract);
+        if (index == -1) {
+            ConsoleHelper.writeMessageInLabelInRightCorner("МікроОб'єкт зараз за межами макроОб'єкта.",7,WIDTH,HEIGHT);
+            return;
+        }
+        pullCreature(index);
     }
 
     public int getX() {

@@ -15,7 +15,6 @@ public class Cave extends MacroObjectAbstract{
 
     public Cave(int x, int y) {
         super(x, y);
-        loadCreatures();
     }
 
     @Override

@@ -120,4 +120,5 @@ public class Soldier extends Recruit {
     public Object clone() {
         return new Soldier(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(this.getInventoryMax()),getExperiencePoint(),getX(),getY(),speed);
     }
+
 }

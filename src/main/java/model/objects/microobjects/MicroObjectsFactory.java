@@ -6,10 +6,14 @@ import com.almasb.fxgl.entity.*;
 import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import model.objects.EntityType;
 import model.Player;
+
+import static utilies.ConsoleHelper.font;
 
 public class MicroObjectsFactory implements EntityFactory {
     @Spawns("Player")
@@ -49,7 +53,7 @@ public class MicroObjectsFactory implements EntityFactory {
         ));
 
         //enableHitboxView(cultistE);
-
+        enableLabelPrimitiveView(cultistE,"в)");
         return cultistE;
     }
     @Spawns("Recruit")
@@ -65,11 +69,11 @@ public class MicroObjectsFactory implements EntityFactory {
                 .build();
 
         recruitE.getBoundingBoxComponent().addHitBox(new HitBox(
-                new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
-                BoundingShape.box(31, 85) // Розмір хитбоксу
+                new Point2D(0, -5), // Зміщення хитбоксу (всередину спрайта)
+                BoundingShape.box(32, 86) // Розмір хитбоксу
         ));
-
-        //enableHitboxView(recruitE);
+        //enableLabelPrimitiveView(recruitE,"а)");
+        enableHitboxView(recruitE);
         return recruitE;
     }
 
@@ -85,24 +89,33 @@ public class MicroObjectsFactory implements EntityFactory {
                 .type(EntityType.ENEMY)
                 .build();
         soldierE.getBoundingBoxComponent().addHitBox(new HitBox(
-                new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
-                BoundingShape.box(31, 85) // Розмір хитбоксу
+                new Point2D(0, -5), // Зміщення хитбоксу (всередину спрайта)
+                BoundingShape.box(32, 86) // Розмір хитбоксу
         ));
-
-        //enableHitboxView(soldierE);
+        //enableLabelPrimitiveView(soldierE,"б)");
+        enableHitboxView(soldierE);
         return soldierE;
     }
 
     public static void enableHitboxView(Entity entity) {
         for (HitBox box : entity.getBoundingBoxComponent().hitBoxesProperty()) {
-            Rectangle rect = new Rectangle(box.getWidth(), box.getHeight(), Color.color(1, 0, 0, 0.3));
-            rect.setStroke(Color.RED);
+            Rectangle rect = new Rectangle(box.getWidth(), box.getHeight(), Color.color(1, 1, 1, 0.1));
+            rect.setStroke(Color.BLACK);
             rect.setStrokeWidth(1.5);
             rect.setTranslateX(box.getMinX());
             rect.setTranslateY(box.getMinY());
 
             entity.getViewComponent().addChild(rect);
         }
+    }
+
+    public static void enableLabelPrimitiveView(Entity entity,String string) {
+        HitBox hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
+        Label label = new Label(string);
+        label.setFont(font);
+        label.setLayoutY(hitBox.getMaxY());
+        label.setLayoutX(hitBox.getMaxX()-3);
+        entity.getViewComponent().addChild(label);
     }
 
 }

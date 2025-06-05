@@ -1,5 +1,6 @@
 package model.objects.macroobjects;
 
+import model.objects.microobjects.Cultist;
 import utilies.ImageLoader;
 
 public class Dormitory extends MacroObjectAbstract{
@@ -10,6 +11,9 @@ public class Dormitory extends MacroObjectAbstract{
 
     @Override
     public boolean loadCreatures() {
+        addCreature(new Cultist());
+        addCreature(new Cultist());
+        addCreature(new Cultist());
         return false;
     }
 

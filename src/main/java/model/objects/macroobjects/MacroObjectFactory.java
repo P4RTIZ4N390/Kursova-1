@@ -5,18 +5,10 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
-import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
-import com.almasb.fxgl.physics.PhysicsComponent;
-import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import model.objects.EntityType;
-
-import javax.naming.spi.ObjectFactory;
-
-import static model.objects.microobjects.MicroObjectsFactory.enableHitboxView;
 
 public class MacroObjectFactory implements EntityFactory {
     @Spawns("Cave")
@@ -31,7 +23,7 @@ public class MacroObjectFactory implements EntityFactory {
                 .with(cave)
                 .build();
 
-        enableHitboxView(e,Color.YELLOW);
+        enableCirclePrimitiveView(e,Color.YELLOW);
 
         return e;
     }
@@ -46,7 +38,7 @@ public class MacroObjectFactory implements EntityFactory {
                 .type(EntityType.MACROOBJECT)
                 .build();
 
-        enableHitboxView(e,Color.CYAN);
+        enableCirclePrimitiveView(e,Color.CYAN);
 
         return e;
     }
@@ -61,12 +53,12 @@ public class MacroObjectFactory implements EntityFactory {
                 .type(EntityType.MACROOBJECT)
                 .build();
 
-        enableHitboxView(e,Color.CRIMSON);
+        enableCirclePrimitiveView(e,Color.CRIMSON);
 
         return e;
     }
 
-    public static void enableHitboxView(Entity entity,Color circleColor) {
+    public static void enableCirclePrimitiveView(Entity entity, Color circleColor) {
         HitBox hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
         Circle circle = new Circle(hitBox.getMaxX()-8, hitBox.getMinY()+5, 5, circleColor);
         entity.getViewComponent().addChild(circle);

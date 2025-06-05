@@ -1,5 +1,5 @@
 package model.objects.microobjects;
 
 public enum typeOfMicroObject {
-    RECRUIT,SOLDIER,CULTIST
+    MICRO_OBJECT,RECRUIT,SOLDIER,CULTIST
 }

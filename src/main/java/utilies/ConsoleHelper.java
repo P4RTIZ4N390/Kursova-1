@@ -23,7 +23,7 @@ public class ConsoleHelper {
     private static final TextFlow textArea = new TextFlow();
 
     public static final Font font = Font.font("Consolas",18);//Шрифт для звичайних повідомлень
-    public static final Font smallFont = Font.font("Consolas",12);//Шрифт для не важливих повідомлень або для показу інформації
+    public static final Font smallFont = Font.font("Consolas",10);//Шрифт для не важливих повідомлень або для показу інформації
 
     private static final BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));//Зчитувач з консолі
 
@@ -124,7 +124,7 @@ public class ConsoleHelper {
         label.setFont(font);
         label.setTextFill(Color.LIGHTGREEN);
         //встановлюємо стиль
-        label.setLayoutX(message.width - 320); // 400 + 20 padding
+        label.setLayoutX(message.width - 380); // 400 + 20 padding
         label.setLayoutY(message.height-10);// приблизно знизу
         // Встановлюємо розташування
         int amount = (int) Math.ceil((message.durationInSeconds-1.5)/0.02);

@@ -144,8 +144,6 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         this.x = x;
        // ConsoleHelper.writeMessage("Змінено x "+this+x);
     }
-
-
     public void setY(int y) {
         this.y = y;
         //ConsoleHelper.writeMessage("Змінено у "+this+y);
@@ -202,7 +200,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         loadAnimatedTexture();
         entity.getViewComponent().addChild(mainTexture); // або твоя текстура істоти
         updateItem();
-        entity.getViewComponent().addChild(weaponTexture);
+        //entity.getViewComponent().addChild(weaponTexture);
 
     }
 

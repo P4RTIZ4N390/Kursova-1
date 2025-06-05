@@ -634,7 +634,7 @@ public class Lab4 extends GameApplication {
      * @param microObjectAbstract об'єкт який буде змінюватись
      * @param entity об'єкта який буде змінюватись
      */
-    private void changeMicroObjectDialog(MicroObjectAbstract microObjectAbstract, Entity entity) {
+    protected void changeMicroObjectDialog(MicroObjectAbstract microObjectAbstract, Entity entity) {
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Змінити мікроОбєкт " + microObjectAbstract);
@@ -654,8 +654,8 @@ public class Lab4 extends GameApplication {
         grid.add(nameField, 1, 0);
 
         //Поля координат
-        Spinner<Integer> xField = new Spinner<>(0, WIDTH, (int) entity.getX());
-        Spinner<Integer> yField = new Spinner<>(0, HEIGHT, (int) entity.getY());
+        Spinner<Integer> xField = new Spinner<>(0, WIDTH, microObjectAbstract.getX());
+        Spinner<Integer> yField = new Spinner<>(0, HEIGHT, microObjectAbstract.getY());
         grid.add(new Label("X:"), 0, 1);
         grid.add(xField, 1, 1);
         grid.add(new Label("Y:"), 0, 2);
@@ -731,8 +731,128 @@ public class Lab4 extends GameApplication {
                 changes.append("Кількість досвіду змінено на ").append(exper).append(" \n ");
                 isHaveChanged = true;
             }
-            PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
-            physics.overwritePosition(new Point2D(newX, newY));
+            if (entity != null) {
+                PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
+                physics.overwritePosition(new Point2D(newX, newY));
+            }
+
+            // Вносимо зміни, якщо вони були
+            if (isHaveChanged) ConsoleHelper.writeMessageInLabelInRightCorner(changes.toString(), 10,WIDTH,HEIGHT);
+            microObjectAbstract.setCreatureName(name);
+            microObjectAbstract.setHealth(healt);
+            microObjectAbstract.setArmor(arm);
+            microObjectAbstract.setExperiencePoint(exper);
+            microObjectAbstract.setActive(isActive);  // встановлюємо активність
+        }
+    }
+
+    /**
+     * Діалог зміни мікроОбєкта
+     * @param microObjectAbstract об'єкт який буде змінюватись
+     * @param entity об'єкта який буде змінюватись
+     * @param position координати на які буде встановлено діалог
+     */
+    protected void changeMicroObjectDialog(MicroObjectAbstract microObjectAbstract, Entity entity,Point position) {
+        // Створюємо діалог
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Змінити мікроОбєкт " + microObjectAbstract);
+        // Кнопки OK та Cancel
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Макет з полями введення
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(15));
+
+        // Назва істоти
+        TextField nameField = new TextField();
+        nameField.setPromptText(microObjectAbstract.getCreatureName());
+        grid.add(new Label("Ім'я:"), 0, 0);
+        grid.add(nameField, 1, 0);
+
+        //Поля координат
+        Spinner<Integer> xField = new Spinner<>(0, WIDTH, microObjectAbstract.getX());
+        Spinner<Integer> yField = new Spinner<>(0, HEIGHT, microObjectAbstract.getY());
+        grid.add(new Label("X:"), 0, 1);
+        grid.add(xField, 1, 1);
+        grid.add(new Label("Y:"), 0, 2);
+        grid.add(yField, 1, 2);
+
+        // Кількість здоров'я
+        Spinner<Integer> health = new Spinner<>(0, 10000, microObjectAbstract.getHealth());
+        grid.add(new Label("Health:"), 0, 3);
+        grid.add(health, 1, 3);
+
+        // Кількість броні
+        Spinner<Double> armor = new Spinner<>(0, 1000, microObjectAbstract.getArmor(), 0.1);
+        grid.add(new Label("Armor:"), 0, 4);
+        grid.add(armor, 1, 4);
+
+
+        // Кількість досвіду об'єкта
+        Spinner<Double> experience = new Spinner<>(0, 1000, microObjectAbstract.getExperiencePoint(), 0.1);
+        grid.add(new Label("experience:"), 0, 5);
+        grid.add(experience, 1, 5);
+
+        // Активність (CheckBox)
+        CheckBox activeBox = new CheckBox("Активний");
+        activeBox.setSelected(microObjectAbstract.isActive());
+        grid.add(activeBox, 1, 6);
+
+        if (position != null) {
+            dialog.setX(position.getX());
+            dialog.setY(position.getY());
+        }
+
+        // Встановлюємо макет
+        dialog.getDialogPane().setContent(grid);
+
+        // Обробка результату діалогу
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            String name = nameField.getText().isEmpty() ? microObjectAbstract.getCreatureName() : nameField.getText().trim();
+            int newX = xField.getValue();
+            int newY = yField.getValue();
+            int healt = health.getValue();
+            double arm = armor.getValue();
+            double exper = experience.getValue();
+            boolean isActive = activeBox.isSelected();
+
+            boolean isHaveChanged = false;
+
+            //Вивід повідомлення про зміни
+            StringBuilder changes = new StringBuilder("Зміни в " + microObjectAbstract + ": \n ");
+            if (!microObjectAbstract.getCreatureName().equals(name)) {
+                changes.append("Імя змінено на ").append(name).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (!(microObjectAbstract.getX() == newX)) {
+                changes.append("Переміщено на x: ").append(newX).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (!(microObjectAbstract.getY() == newY)) {
+                changes.append("Переміщено на y: ").append(newY).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (!(microObjectAbstract.getHealth() == healt)) {
+                changes.append("Кількість здоровя ").append("змінено на ").append(healt).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (!(microObjectAbstract.getArmor() == arm)) {
+                changes.append("Кількість броні змінено на ").append(arm).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (!(microObjectAbstract.getExperiencePoint() == exper)) {
+                changes.append("Кількість досвіду змінено на ").append(exper).append(" \n ");
+                isHaveChanged = true;
+            }
+            if (entity != null) {
+                PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
+                physics.overwritePosition(new Point2D(newX, newY));
+            }
 
             // Вносимо зміни, якщо вони були
             if (isHaveChanged) ConsoleHelper.writeMessageInLabelInRightCorner(changes.toString(), 10,WIDTH,HEIGHT);
@@ -763,7 +883,7 @@ public class Lab4 extends GameApplication {
         // Обгортаємо звичайний список в ObservableList
         ObservableList<MicroObjectAbstract> observableMicroObjectAbstracts = FXCollections.observableArrayList(macroObjectAbstract.getCreatures());
         // Створюємо візуальний список
-        ListView<MicroObjectAbstract> listView = getListCreatureView(observableMicroObjectAbstracts);
+        ListView<MicroObjectAbstract> listView = getListMicroObjectView(observableMicroObjectAbstracts);
 
         grid.add(listView, 1, 0);
 
@@ -792,7 +912,7 @@ public class Lab4 extends GameApplication {
      * @param observableMicroObjectAbstracts  список мікроОбєктів
      * @return список перегляду мікроОбєктів
      */
-    private static ListView<MicroObjectAbstract> getListCreatureView(@NotNull ObservableList<MicroObjectAbstract> observableMicroObjectAbstracts) {
+    protected static ListView<MicroObjectAbstract> getListMicroObjectView(@NotNull ObservableList<MicroObjectAbstract> observableMicroObjectAbstracts) {
 
         ListView<MicroObjectAbstract> listView = new ListView<>();
         listView.setItems(observableMicroObjectAbstracts);
@@ -859,16 +979,11 @@ public class Lab4 extends GameApplication {
         });
     }
 
-
-
-
-
-
     /**
      * @param width ширина вікна діалогу
      * @param height висота вікна діалогу
      */
-    private static Point getNormalPositionForDialog(int width, int height) {
+    protected static Point getNormalPositionForDialog(int width, int height) {
         // Отримуємо поточну позицію курсора (Screen Coordinates)
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         int x = mousePos.x;
