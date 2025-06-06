@@ -11,6 +11,7 @@ import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
 import com.almasb.fxgl.texture.*;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Label;
 import javafx.util.Duration;
 import model.Direction;
 import model.TriggerComponent;
@@ -19,12 +20,14 @@ import model.items.firearms.Gun;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.macroobjects.MacroObjectAbstract;
-import model.objects.macroobjects.typeOfMacroObject;
 import my.kursova21.Lab4;
 import org.jetbrains.annotations.NotNull;
 import utilies.ImageLoader;
 
 import java.util.Objects;
+
+import static utilies.ConsoleHelper.font;
+import static utilies.ConsoleHelper.smallFont;
 
 public abstract class MicroObjectAbstract extends Component implements Comparable<MicroObjectAbstract>,Cloneable {
 
@@ -60,6 +63,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected AnimationChannel animIdleRight,animIdleLeft,animIdleDown,animIdleUp,animWalkRight, animWalkLeft, animWalkUp, animWalkDown;
 
     protected Direction direction=Direction.RIGHT;
+    protected Label nameLabel;
 
     public MicroObjectAbstract(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed, EntityType type) {//true constructor
         super();
@@ -96,7 +100,8 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
             mainTexture.stop();
             wasActive = false;
         }
-
+        nameLabel.setText(toString());
+        updateItem();
         super.onUpdate(tpf);
     }
 
@@ -198,10 +203,9 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         entity.addComponent(physics);
         entity.getViewComponent().clearChildren();
         loadAnimatedTexture();
-        entity.getViewComponent().addChild(mainTexture); // або твоя текстура істоти
+        entity.getViewComponent().addChild(mainTexture);// або твоя текстура істоти
         updateItem();
-        //entity.getViewComponent().addChild(weaponTexture);
-
+        entity.getViewComponent().addChild(weaponTexture);
     }
 
     public abstract String toString();
@@ -288,9 +292,33 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         if (weaponTexture==null) {
             weaponTexture=new AnimatedTexture(ImageLoader.loadAnimationChannel(ImageLoader.loadSpriteSheet("src/main/resources/assets/textures/Box.png"),1,13,15,1));
         }
+        HitBox hitBox=null;
+        try {
+            hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
+        } catch (Exception ignored) {
+        }
         weaponTexture.loopAnimationChannel(inventory.getCurrentGun().getGunTexture(direction));
+        if (hitBox != null) {
+            switch (direction) {
+                case RIGHT -> {
+                    weaponTexture.setLayoutX(hitBox.getMaxX()-10);
+                    weaponTexture.setLayoutY(hitBox.getMaxY()/2-25);
+                }
+                case LEFT -> {
+                    weaponTexture.setLayoutX(hitBox.getMinX());
+                    weaponTexture.setLayoutY(hitBox.getMaxY()/2-25);
+                }
+                case UP -> {
+                    weaponTexture.setLayoutY(5);
+                    weaponTexture.setLayoutX(hitBox.getMaxX()/2-5);
+                }
+                case DOWN -> {
+                    weaponTexture.setLayoutY(hitBox.getMaxY()/2-10);
+                    weaponTexture.setLayoutX(hitBox.getMaxX()/2-5);
+                }
+            }
+        }
     }
-
 
     @Override
     public int compareTo(@NotNull MicroObjectAbstract o) {
@@ -349,16 +377,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         clone.setX(x);
         clone.setY(y);
 
-        Entity newEntity = FXGL.entityBuilder()
-                .at(new Point2D(x, y))
-                .type(clone.getType()) // Якщо маєш тип
-                .with(clone) // Додаємо клонований компонент
-                .build();
-        newEntity.getBoundingBoxComponent().addHitBox(new HitBox(
-                new Point2D(0, -4), // Зміщення хитбоксу (всередину спрайта)
-                BoundingShape.box(31, 85) // Розмір хитбоксу
-        ));
-        return newEntity;
+        return clone.getNewEntity();
     }
 
     public abstract Entity getNewEntity();
@@ -373,6 +392,22 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public void setMacroObjectAbstract(MacroObjectAbstract macroObjectAbstract) {
         this.macroObjectAbstract = macroObjectAbstract;
+    }
+
+    public void enableLabelPrimitiveView(Entity entity) {
+        HitBox hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
+        nameLabel = new Label(this.toString());
+        nameLabel.setFont(smallFont);
+        nameLabel.setLayoutY(hitBox.getMaxY());
+        nameLabel.setLayoutX(hitBox.getMinX());
+        entity.getViewComponent().addChild(nameLabel);
+    }
+
+    public String getWhereMicroObject() {
+        if (macroObjectAbstract!=null && macroObjectAbstract.getCreatures().contains(this)){
+            return "МікроОбєкт в "+macroObjectAbstract;
+        }
+        return "Координати : x="+getX()+",y="+getY();
     }
 }
 

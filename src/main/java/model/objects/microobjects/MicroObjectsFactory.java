@@ -14,6 +14,7 @@ import model.objects.EntityType;
 import model.Player;
 
 import static utilies.ConsoleHelper.font;
+import static utilies.ConsoleHelper.smallFont;
 
 public class MicroObjectsFactory implements EntityFactory {
     @Spawns("Player")
@@ -52,8 +53,8 @@ public class MicroObjectsFactory implements EntityFactory {
                 BoundingShape.box(32, 82) // Розмір хитбоксу
         ));
 
-        //enableHitboxView(cultistE);
-        enableLabelPrimitiveView(cultistE,"в)");
+//        enableHitboxView(cultistE);
+        cultist.enableLabelPrimitiveView(cultistE);
         return cultistE;
     }
     @Spawns("Recruit")
@@ -72,8 +73,9 @@ public class MicroObjectsFactory implements EntityFactory {
                 new Point2D(0, -5), // Зміщення хитбоксу (всередину спрайта)
                 BoundingShape.box(32, 86) // Розмір хитбоксу
         ));
-        //enableLabelPrimitiveView(recruitE,"а)");
-        enableHitboxView(recruitE);
+//        enableLabelPrimitiveView(recruitE,"а)");
+        recruit.enableLabelPrimitiveView(recruitE);
+//        enableHitboxView(recruitE);
         return recruitE;
     }
 
@@ -92,15 +94,16 @@ public class MicroObjectsFactory implements EntityFactory {
                 new Point2D(0, -5), // Зміщення хитбоксу (всередину спрайта)
                 BoundingShape.box(32, 86) // Розмір хитбоксу
         ));
-        //enableLabelPrimitiveView(soldierE,"б)");
-        enableHitboxView(soldierE);
+        soldier.enableLabelPrimitiveView(soldierE);
+//        enableLabelPrimitiveView(soldierE,"б)");
+//        enableHitboxView(soldierE);
         return soldierE;
     }
 
     public static void enableHitboxView(Entity entity) {
         for (HitBox box : entity.getBoundingBoxComponent().hitBoxesProperty()) {
-            Rectangle rect = new Rectangle(box.getWidth(), box.getHeight(), Color.color(1, 1, 1, 0.1));
-            rect.setStroke(Color.BLACK);
+            Rectangle rect = new Rectangle(box.getWidth()+3, box.getHeight()+2, Color.color(1, 1, 1, 0.1));
+            rect.setStroke(Color.RED);
             rect.setStrokeWidth(1.5);
             rect.setTranslateX(box.getMinX());
             rect.setTranslateY(box.getMinY());
@@ -112,9 +115,9 @@ public class MicroObjectsFactory implements EntityFactory {
     public static void enableLabelPrimitiveView(Entity entity,String string) {
         HitBox hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
         Label label = new Label(string);
-        label.setFont(font);
-        label.setLayoutY(hitBox.getMaxY());
-        label.setLayoutX(hitBox.getMaxX()-3);
+        label.setFont(smallFont);
+        label.setLayoutY(hitBox.getMaxY()+10);
+        label.setLayoutX(hitBox.getMaxX()/2);
         entity.getViewComponent().addChild(label);
     }
 

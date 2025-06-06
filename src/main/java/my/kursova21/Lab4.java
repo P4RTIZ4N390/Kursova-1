@@ -81,7 +81,7 @@ public class Lab4 extends GameApplication {
         getGameWorld().addEntityFactory(new MacroObjectFactory());// Реєструємо фабрику МакроОбєктів
         spawn("Crypt", 1000, 800);
         spawn("Dormitory", 1200, 800);
-        spawn("Cave", WIDTH - 128, HEIGHT - 128);
+        spawn("Cave", 1400,800 );
         spawn("Recruit", 300, 500);
         spawn("Soldier", 500, 500);
         spawn("Cultist", 800, 300);

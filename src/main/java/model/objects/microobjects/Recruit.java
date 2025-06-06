@@ -147,6 +147,8 @@ public class Recruit extends MicroObjectAbstract {//рекрут
                 BoundingShape.box(31, 85) // Розмір хитбоксу
         ));
 
+        enableLabelPrimitiveView(entity);
+
         return recruitE;
     }
 

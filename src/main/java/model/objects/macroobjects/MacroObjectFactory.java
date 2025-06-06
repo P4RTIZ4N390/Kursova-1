@@ -9,6 +9,7 @@ import com.almasb.fxgl.physics.HitBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import model.objects.EntityType;
+import model.objects.microobjects.MicroObjectsFactory;
 
 public class MacroObjectFactory implements EntityFactory {
     @Spawns("Cave")
@@ -22,8 +23,9 @@ public class MacroObjectFactory implements EntityFactory {
                 .type(EntityType.MACROOBJECT)
                 .with(cave)
                 .build();
-
+        MicroObjectsFactory.enableLabelPrimitiveView(e,"в)");
         enableCirclePrimitiveView(e,Color.YELLOW);
+        MicroObjectsFactory.enableHitboxView(e);
 
         return e;
     }
@@ -39,7 +41,8 @@ public class MacroObjectFactory implements EntityFactory {
                 .build();
 
         enableCirclePrimitiveView(e,Color.CYAN);
-
+        MicroObjectsFactory.enableHitboxView(e);
+        MicroObjectsFactory.enableLabelPrimitiveView(e,"а)");
         return e;
     }
 
@@ -54,6 +57,8 @@ public class MacroObjectFactory implements EntityFactory {
                 .build();
 
         enableCirclePrimitiveView(e,Color.CRIMSON);
+        MicroObjectsFactory.enableHitboxView(e);
+        MicroObjectsFactory.enableLabelPrimitiveView(e,"б)");
 
         return e;
     }

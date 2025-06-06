@@ -143,8 +143,8 @@ public class Cultist extends Soldier {//Окультист
                 BoundingShape.box(32, 82) // Розмір хитбоксу
         ));
 
+        enableLabelPrimitiveView(entity);
+
         return cultistE;
     }
-
-
 }

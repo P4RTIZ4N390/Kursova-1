@@ -3,6 +3,7 @@ package my.kursova21;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.input.Input;
+import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import model.TriggerComponent;
-import model.objects.macroobjects.MacroObjectAbstract;
+import model.objects.macroobjects.*;
 import model.objects.microobjects.*;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -43,7 +44,7 @@ public class Lab5 extends Lab4{
         super.setupControls();
         Input input = FXGL.getInput();
 
-        input.addAction(new UserAction("Search") {
+        input.addAction(new UserAction("Search with parameters") {
             @Override
             protected void onActionBegin() {
                 ListView<MicroObjectAbstract> list = getListMicroObjectView(FXCollections.observableList(searchDialogWithParametersAndResult()));
@@ -54,6 +55,18 @@ public class Lab5 extends Lab4{
                 super.onActionBegin();
             }
         }, KeyCode.S);
+
+        input.addAction(new UserAction("Search with macroObject") {
+            @Override
+            protected void onActionBegin() {
+                ListView<MicroObjectAbstract> list = getListMicroObjectView(FXCollections.observableList(searchDialogWithMacroObjectAndResult()));
+                if (list.getItems().isEmpty()) {
+                    return;
+                }
+                workWithSearchResult(list);
+                super.onActionBegin();
+            }
+        }, KeyCode.S,InputModifier.CTRL );
     }
 
     private List<MicroObjectAbstract> searchDialogWithParametersAndResult() {
@@ -148,6 +161,88 @@ public class Lab5 extends Lab4{
         return allMicroObjects;
     }
 
+    private List<MicroObjectAbstract> searchDialogWithMacroObjectAndResult() {
+        // Створюємо діалог
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Пошук мікроОбєктів");
+        // Кнопки OK та Cancel
+        dialog.getDialogPane().getButtonTypes().addAll(new ButtonType("Пошук", ButtonBar.ButtonData.YES),new ButtonType("Скасувати", ButtonBar.ButtonData.CANCEL_CLOSE) );
+
+        // Макет з полями введення
+        GridPane grid = new GridPane();
+        grid.setHgap(3);
+        grid.setVgap(10);
+        //Відступи між елементами
+        grid.setPadding(new Insets(15));
+
+        // Належність до макроОбєкта шуканого мікроОбєкт (ChoiceBox з enum)
+        ChoiceBox<typeOfMacroObject> typeChoice = new ChoiceBox<>();
+        typeChoice.getItems().addAll(typeOfMacroObject.CAVE,typeOfMacroObject.CRYPT,typeOfMacroObject.DORMITORY,typeOfMacroObject.UNIVERSAL);
+        typeChoice.setValue(typeOfMacroObject.UNIVERSAL);
+        grid.add(new Label("Належність до макрооб'єкта :"), 0, 1);
+        grid.add(typeChoice, 1, 1);
+
+        // Активність шуканого мікроОбєкт (CheckBox)
+        CheckBox activeBox = new CheckBox("Активний");
+        activeBox.setSelected(false);
+        grid.add(activeBox, 0, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Встановлення розміру вікна діалогу
+        dialog.getDialogPane().setPrefSize(330, 165);
+
+        // Обробка результату діалогу
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.get() == ButtonType.CANCEL) {
+            return new ArrayList<>();
+        }
+
+        List<MicroObjectAbstract> allMicroObjects = new ArrayList<>(FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MicroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MicroObjectAbstract
+                .map(MicroObjectAbstract.class::cast)
+                .toList());
+
+        List<MacroObjectAbstract> allMacroObjects = FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
+                .map(MacroObjectAbstract.class::cast)
+                .toList();
+
+        List<MicroObjectAbstract> microObjectAbstractsInMacroObjects = new ArrayList<>();
+        allMacroObjects.forEach(macroObjectAbstract -> microObjectAbstractsInMacroObjects.addAll(macroObjectAbstract.getCreatures()));
+
+        allMicroObjects.addAll(microObjectAbstractsInMacroObjects);
+
+        switch (typeChoice.getValue()) {
+            case CAVE -> allMicroObjects = allMicroObjects.stream()
+                    .filter(m -> m.getMacroObjectAbstract() instanceof Cave)
+                    .toList();
+            case CRYPT -> allMicroObjects = allMicroObjects.stream()
+                    .filter(m -> m.getMacroObjectAbstract() instanceof Crypt)
+                    .toList();
+            case DORMITORY -> allMicroObjects = allMicroObjects.stream()
+                    .filter(m -> m.getMacroObjectAbstract() instanceof Dormitory)
+                    .toList();
+            default -> allMicroObjects = allMicroObjects.stream()
+                    .filter(m -> m.getMacroObjectAbstract() == null)
+                    .toList();
+        }
+        if (activeBox.isSelected()) {
+            allMicroObjects = allMicroObjects.stream()
+                    .filter(MicroObjectAbstract::isActive)
+                    .toList();
+        }
+        return allMicroObjects;
+    }
+
     private void workWithSearchResult(ListView<MicroObjectAbstract> microObjectListView) {
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -166,7 +261,7 @@ public class Lab5 extends Lab4{
         grid.add(microObjectListView, 1, 0);
 
         // Встановлюємо максимальні розміри вікна списку
-        microObjectListView.setPrefSize(320, 200);
+        microObjectListView.setPrefSize(450, 200);
 
         //Встановлюємо макет в діалог
         dialog.getDialogPane().setContent(grid);
@@ -196,6 +291,7 @@ public class Lab5 extends Lab4{
         if (result.get() == editBtn){
             changeMicroObjectDialog(selectedMicroObjectAbstract,selectedMicroObjectAbstract.getEntity(),null);
         }
+
     }
 
     private static ListView<MacroObjectAbstract> getListViewMacroObjects(ListView<MicroObjectAbstract> microObjectListView) {
@@ -265,7 +361,7 @@ public class Lab5 extends Lab4{
                     row.setAlignment(Pos.CENTER_LEFT);
 
                     // Назва істоти
-                    Text nameText = new Text(microObjectAbstract+"            "+microObjectAbstract.getMacroObjectAbstract());
+                    Text nameText = new Text(microObjectAbstract+"            "+microObjectAbstract.getWhereMicroObject()+"            "+microObjectAbstract.getMacroObjectAbstract());
                     nameText.setFont(smallFont);
                     nameText.setFill(Color.LIGHTGREEN);
 
