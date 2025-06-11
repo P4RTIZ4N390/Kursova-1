@@ -5,15 +5,18 @@ import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
+import model.objects.microobjects.MicroObjectAbstract;
 
 public abstract class  Bullet extends Component {
     private final Point2D velocity;
     private final int attackDamage;
 
+    private final MicroObjectAbstract shooter;
 
-    public Bullet(Point2D direction, int additionalDamage, int trueDamage,double bulletSpeed ) {
+    public Bullet(Point2D direction, int additionalDamage, int trueDamage,double bulletSpeed,MicroObjectAbstract shooter ) {
         this.velocity = direction.normalize().multiply(bulletSpeed*3);
         this.attackDamage= additionalDamage+trueDamage;
+        this.shooter=shooter;
     }
 
     @Override

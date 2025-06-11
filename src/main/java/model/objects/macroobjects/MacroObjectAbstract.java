@@ -111,4 +111,8 @@ public abstract class MacroObjectAbstract extends Component {
     public boolean isEmpty() {
         return microObjectAbstracts.isEmpty();
     }
+
+    public Point2D getPosition() {
+        return new Point2D(x, y);
+    }
 }

@@ -69,9 +69,9 @@ public class Player extends MicroObjectAbstract {//singleton pattern
         }
 
         @Override
-        public void fire(double shooterX, double shooterY, Point2D cursorLocation, Inventory inventory, Direction directionOfCreature) {
+        public void fire(MicroObjectAbstract shooter, Point2D cursorLocation, Inventory inventory, Direction directionOfCreature) {
             if(leftAmmo > 0 ){
-                Point2D startPos = getStartPos(shooterX, shooterY, directionOfCreature);
+                Point2D startPos = getStartPos(shooter.getX(), shooter.getY(), directionOfCreature);
                 Point2D direction = cursorLocation.subtract(startPos).normalize(); // Вектор напрямку
                 direction=direction.add(RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount()),RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount())).normalize();//Обрахунок розкиду пострілу і траєкторії
 
@@ -79,12 +79,12 @@ public class Player extends MicroObjectAbstract {//singleton pattern
 
                 switch (directionOfCreature) {
                     case UP,DOWN->{
-                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX()-1.5,startPos.getY()),EntityType.PLAYER_BULLET));
-                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX()+1.5,startPos.getY()),EntityType.PLAYER_BULLET));
+                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX()-1.5,startPos.getY()),EntityType.PLAYER_BULLET,Player.getInstance()));
+                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX()+1.5,startPos.getY()),EntityType.PLAYER_BULLET,Player.getInstance()));
                     }
                     case LEFT,RIGHT->{
-                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX(),startPos.getY()-1.5),EntityType.PLAYER_BULLET));
-                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX(),startPos.getY()-1.5),EntityType.PLAYER_BULLET));
+                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX(),startPos.getY()-1.5),EntityType.PLAYER_BULLET,Player.getInstance()));
+                        FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,new Point2D(startPos.getX(),startPos.getY()-1.5),EntityType.PLAYER_BULLET,Player.getInstance()));
                     }
                 }
 
@@ -93,11 +93,11 @@ public class Player extends MicroObjectAbstract {//singleton pattern
         }
 
         @Override
-        protected Entity getEntityBullet(Point2D direction, double angle, Point2D startPos, EntityType type) {
+        protected Entity getEntityBullet(Point2D direction, double angle, Point2D startPos, EntityType type,MicroObjectAbstract shooter) {
             Entity bullet = new Entity();
             bullet.setPosition(startPos);
 
-            Bullet infoBullet = new Bullet(direction,50,40,1000) {
+            Bullet infoBullet = new Bullet(direction,50,40,1000,Player.getInstance()) {
                 @Override
                 public Texture getBulletTexture() {
                     return ImageLoader.loadExternalTexture("D:\\java_projects\\Kursova2.1\\src\\main\\resources\\assets\\textures\\bullets\\45ACP.png");
@@ -318,7 +318,7 @@ public class Player extends MicroObjectAbstract {//singleton pattern
                         stop();
                     }
 
-                    wristMountedUnderBarrelFirearm.fire(getX(),getY(),FXGL.getInput().getMousePositionUI(),getInventory(),direction);
+                    wristMountedUnderBarrelFirearm.fire(Player.getInstance(),FXGL.getInput().getMousePositionUI(),getInventory(),direction);
                 }
             }
         },KeyCode.E);

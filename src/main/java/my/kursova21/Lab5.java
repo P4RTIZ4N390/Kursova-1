@@ -2,14 +2,17 @@ package my.kursova21;
 
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -21,10 +24,10 @@ import javafx.scene.text.Text;
 import model.TriggerComponent;
 import model.objects.macroobjects.*;
 import model.objects.microobjects.*;
+import model.objects.microobjects.behaviour.Command;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -38,6 +41,19 @@ public class Lab5 extends Lab4{
     }
 
     public static void main(String[] args) {launch(args);}
+
+    @Override
+    protected void initGame() {
+        super.initGame();
+        Recruit recruit = new Recruit(0,0);
+        Entity entity = recruit.getNewEntity();
+        FXGL.getGameWorld().addEntity(entity);
+        Soldier soldier = new Soldier(800,20);
+        Entity entity1 = soldier.getNewEntity();
+        FXGL.getGameWorld().addEntity(entity1);
+        recruit.addCommand(Command.getAttackCommand(soldier));
+        soldier.addCommand(Command.getMoveToCommand(new Point2D(550,700)));
+    }
 
     @Override
     protected void setupControls() {
@@ -164,7 +180,7 @@ public class Lab5 extends Lab4{
     private List<MicroObjectAbstract> searchDialogWithMacroObjectAndResult() {
         // Створюємо діалог
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Пошук мікроОбєктів");
+        dialog.setTitle("Пошук мікроОбєктів,за макрооб'єктом");
         // Кнопки OK та Cancel
         dialog.getDialogPane().getButtonTypes().addAll(new ButtonType("Пошук", ButtonBar.ButtonData.YES),new ButtonType("Скасувати", ButtonBar.ButtonData.CANCEL_CLOSE) );
 
@@ -252,11 +268,16 @@ public class Lab5 extends Lab4{
         ButtonType editBtn = new ButtonType("Змінити", ButtonBar.ButtonData.OTHER);
         dialog.getDialogPane().getButtonTypes().addAll(pullBtn,editBtn,ButtonType.CANCEL);
 
+        Button sortBtn = new Button("Сортувати за критеріям");
+        sortBtn.setOnAction((e)-> {       sortByCriteriaDialog(microObjectListView);});
+
         // Макет з полями введення
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(15));
+
+        grid.add(sortBtn,2,0);
 
         grid.add(microObjectListView, 1, 0);
 
@@ -291,7 +312,57 @@ public class Lab5 extends Lab4{
         if (result.get() == editBtn){
             changeMicroObjectDialog(selectedMicroObjectAbstract,selectedMicroObjectAbstract.getEntity(),null);
         }
+    }
 
+    private void sortByCriteriaDialog(ListView<MicroObjectAbstract> microObjectAbstracts) {
+        List<MicroObjectAbstract> result = new ArrayList<>(microObjectAbstracts.getItems());
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Сортувати за ");
+        ButtonType sortBtn = new ButtonType("Сортувати", ButtonBar.ButtonData.OTHER);
+        // Кнопки OK та Cancel
+        dialog.getDialogPane().getButtonTypes().addAll(sortBtn,new ButtonType("Скасувати", ButtonBar.ButtonData.CANCEL_CLOSE) );
+
+        // Макет з полями введення
+        GridPane grid = new GridPane();
+        grid.setHgap(3);
+        grid.setVgap(10);
+        //Відступи між елементами
+        grid.setPadding(new Insets(15));
+
+       List<String> criteria = new ArrayList<>();
+       Collections.addAll(criteria,"За здоров'ям","За бронею","За назвою");
+
+        ChoiceBox<String> typeChoice = new ChoiceBox<>();
+        typeChoice.getItems().addAll(criteria);
+        typeChoice.setValue(criteria.getFirst());
+        grid.add(new Label("Критерій :"), 0, 1);
+        grid.add(typeChoice, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        // Обробка результату діалогу
+
+        Optional<ButtonType> resultOfDialog = dialog.showAndWait();
+
+        if (resultOfDialog.get() == ButtonType.CANCEL) {
+            workWithSearchResult(microObjectAbstracts);
+            return;
+        }
+
+        int selectedCriteria = criteria.indexOf(typeChoice.getValue());
+
+        switch (selectedCriteria) {
+            case 0:{
+                result.sort(MicroObjectAbstract::compareToHealth);
+                break;
+            }
+            case 1:{result.sort(MicroObjectAbstract::compareToArmor);
+            break;}
+            case 2:{result.sort(MicroObjectAbstract::compareToName);
+            break;}
+        }
+
+        microObjectAbstracts.setItems(FXCollections.observableList(result));
     }
 
     private static ListView<MacroObjectAbstract> getListViewMacroObjects(ListView<MicroObjectAbstract> microObjectListView) {
@@ -376,5 +447,9 @@ public class Lab5 extends Lab4{
         return listView;
     }
 
+    @Override
+    protected void initPhysics() {
 
+        super.initPhysics();
+    }
 }

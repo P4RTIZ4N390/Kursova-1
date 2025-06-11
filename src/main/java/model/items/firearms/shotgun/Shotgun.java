@@ -10,6 +10,7 @@ import model.Direction;
 import model.objects.EntityType;
 import model.items.firearms.Gun;
 import model.items.inventory.Inventory;
+import model.objects.microobjects.MicroObjectAbstract;
 import model.objects.nanoobjects.bullets.Buckshot;
 import model.objects.nanoobjects.bullets.Bullet;
 import utilies.ConsoleHelper;
@@ -22,10 +23,10 @@ public abstract class Shotgun extends Gun{
     }
 
     @Override
-    public void fire(double shooterX, double shooterY, Point2D target, Inventory inventory, Direction currentDirection) {
+    public void fire(MicroObjectAbstract shooter, Point2D target, Inventory inventory, Direction currentDirection) {
         if (leftAmmo > 0 && !isReloading()) {
             for (int i = -2; i <= 2; i++) {
-                Point2D startPos = new Point2D(shooterX + 20, shooterY + 10); // Початкова позиція кулі
+                Point2D startPos = new Point2D(shooter.getX() + 20, shooter.getY() + 10); // Початкова позиція кулі
                 Point2D direction = target.subtract(startPos).normalize(); // Вектор напрямку
 
                 direction = direction.add(i * 0.1, i * 0.1).normalize();
@@ -35,7 +36,7 @@ public abstract class Shotgun extends Gun{
 
                 double angle = Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
 
-                Bullet infoBullet = new Buckshot(direction, additionalDamage);
+                Bullet infoBullet = new Buckshot(direction, additionalDamage,shooter);
 
                 Texture texture = infoBullet.getBulletTexture();
                 texture.setRotate(angle);

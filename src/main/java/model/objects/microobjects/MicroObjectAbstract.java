@@ -5,13 +5,13 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 import com.almasb.fxgl.entity.components.CollidableComponent;
-import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
 import com.almasb.fxgl.texture.*;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
+import javafx.scene.web.HTMLEditorSkin;
 import javafx.util.Duration;
 import model.Direction;
 import model.TriggerComponent;
@@ -20,13 +20,16 @@ import model.items.firearms.Gun;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.macroobjects.MacroObjectAbstract;
+import model.objects.microobjects.behaviour.Command;
+import model.objects.microobjects.behaviour.Commands;
+import model.objects.microobjects.behaviour.RecruitAIComponent;
 import my.kursova21.Lab4;
 import org.jetbrains.annotations.NotNull;
 import utilies.ImageLoader;
+import utilies.RandomUtil;
 
 import java.util.Objects;
 
-import static utilies.ConsoleHelper.font;
 import static utilies.ConsoleHelper.smallFont;
 
 public abstract class MicroObjectAbstract extends Component implements Comparable<MicroObjectAbstract>,Cloneable {
@@ -48,8 +51,8 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     private double armor;//Math.floor(damage-damage/(100/getArmor) damage it's received damage
     protected Inventory inventory;//it's a place where keeping items
     private double experiencePoint;//Amount of xp, what player received
-    protected PhysicsComponent physics=new PhysicsComponent();
     protected final int speed;
+
     private final EntityType type;
     private MacroObjectAbstract macroObjectAbstract;
 
@@ -61,9 +64,11 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected AnimatedTexture mainTexture;
     protected AnimatedTexture weaponTexture;
     protected AnimationChannel animIdleRight,animIdleLeft,animIdleDown,animIdleUp,animWalkRight, animWalkLeft, animWalkUp, animWalkDown;
-
     protected Direction direction=Direction.RIGHT;
     protected Label nameLabel;
+
+    protected PhysicsComponent physics=new PhysicsComponent();
+    protected RecruitAIComponent behaviourComponent;
 
     public MicroObjectAbstract(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed, EntityType type) {//true constructor
         super();
@@ -178,6 +183,26 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         return speed;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public PhysicsComponent getPhysics() {
+        return physics;
+    }
+
+    public MacroObjectAbstract getMacroObjectAbstract() {
+        return macroObjectAbstract;
+    }
+
+    public void setMacroObjectAbstract(MacroObjectAbstract macroObjectAbstract) {
+        this.macroObjectAbstract = macroObjectAbstract;
+    }
+
     public boolean isDead() {
         return health <= 0;
     }
@@ -205,6 +230,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         loadAnimatedTexture();
         entity.getViewComponent().addChild(mainTexture);// або твоя текстура істоти
         updateItem();
+        addBehaviour();
         entity.getViewComponent().addChild(weaponTexture);
     }
 
@@ -270,14 +296,13 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
                 return;
             }
             firing= gun.IsAutomatic();
-
-            gun.fire(getX(), getY(),target, getInventory(),direction);
+            gun.fire(this,target, getInventory(),direction);
             if (gun.IsAutomatic()) {
                 FXGL.run(() -> {
                     if (firing) {
-                        gun.fire(getX(), getY(), target, getInventory(),direction);
+                        gun.fire(this, target, getInventory(),direction);
                     }
-                }, Duration.seconds(gun.getFireRate())); // Час між пострілами (0.1 сек = 10 пострілів за секунду)
+                }, Duration.seconds(gun.getFireRate()), RandomUtil.getRandomInt(5,10)); // Час між пострілами (0.1 сек = 10 пострілів за секунду)
             }
         }
     }
@@ -341,14 +366,6 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         return Double.compare(o.armor, armor);
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     @Override
     public abstract Object clone() throws CloneNotSupportedException;
 
@@ -382,17 +399,6 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     public abstract Entity getNewEntity();
 
-    public PhysicsComponent getPhysics() {
-        return physics;
-    }
-
-    public MacroObjectAbstract getMacroObjectAbstract() {
-        return macroObjectAbstract;
-    }
-
-    public void setMacroObjectAbstract(MacroObjectAbstract macroObjectAbstract) {
-        this.macroObjectAbstract = macroObjectAbstract;
-    }
 
     public void enableLabelPrimitiveView(Entity entity) {
         HitBox hitBox =entity.getBoundingBoxComponent().hitBoxesProperty().getFirst();
@@ -409,5 +415,24 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         }
         return "Координати : x="+getX()+",y="+getY();
     }
+
+    public boolean isInMacroObject() {
+        return macroObjectAbstract!=null && macroObjectAbstract.getCreatures().contains(this);
+    }
+
+    private void addBehaviour(){
+        if (behaviourComponent!=null) return;
+        behaviourComponent =new RecruitAIComponent();
+        entity.addComponent(behaviourComponent);
+    }
+
+    public Point2D getPosition() {
+        return new Point2D(getX(), getY());
+    }
+
+    public void addCommand(Command command){
+        behaviourComponent.addCommand(command);
+    }
+
 }
 

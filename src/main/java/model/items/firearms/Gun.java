@@ -9,10 +9,12 @@ import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
 import javafx.util.Duration;
 import model.Direction;
+import model.Player;
 import model.objects.EntityType;
 import model.items.Item;
 import model.items.TypesOfItem;
 import model.items.inventory.Inventory;
+import model.objects.microobjects.MicroObjectAbstract;
 import model.objects.nanoobjects.bullets.*;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -126,7 +128,7 @@ public abstract class Gun extends Item implements Firearm {
 
 
 
-            FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,startPos,EntityType.PLAYER_BULLET));
+            FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,startPos,EntityType.PLAYER_BULLET, Player.getInstance()));
             leftAmmo--;
             if (leftAmmo==3) {
                 ConsoleHelper.writeMessage("Залишилося три кулі");
@@ -135,16 +137,16 @@ public abstract class Gun extends Item implements Firearm {
     }
 
     @Override
-    public void fire(double shooterX, double shooterY, Point2D target, Inventory inventory, Direction directionOfCreature) {
+    public void fire(MicroObjectAbstract shooter, Point2D target, Inventory inventory, Direction directionOfCreature) {
         if (leftAmmo > 0 && !isReloading()) {
-            Point2D startPos = getStartPos(shooterX, shooterY, directionOfCreature);
+            Point2D startPos = getStartPos(shooter.getX(), shooter.getY(), directionOfCreature);
             Point2D direction = target.subtract(startPos).normalize(); // Вектор напрямку
             direction=direction.add(RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount()),RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount())).normalize();
             double angle = Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
 
             if (!directionOfCreature.equals(getWhereFireInDirection(angle))) return;
 
-            FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,startPos,EntityType.ENEMY_BULLET));
+            FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,startPos,EntityType.ENEMY_BULLET,shooter));
             leftAmmo--;
         } else reload(inventory);
     }
@@ -163,15 +165,15 @@ public abstract class Gun extends Item implements Firearm {
     }
 
     @NotNull
-    private Bullet getInfoBullet(Point2D direction) {
+    private Bullet getInfoBullet(Point2D direction,MicroObjectAbstract shooter) {
         Bullet infoBullet;
 
         switch (getCaliber()){
-            case "5.7×28мм"->infoBullet=new Bullet57mm(direction,additionalDamage);
-            case "45ACP"->infoBullet=new Bullet45ACP(direction,additionalDamage);
-            case "5.56мм"->infoBullet=new Bullet556mm(direction,additionalDamage);
-            case "7.62х39мм"->infoBullet=new Bullet762mm(direction,additionalDamage);
-            default ->  infoBullet=new Bullet9mm(direction,additionalDamage);
+            case "5.7×28мм"->infoBullet=new Bullet57mm(direction,additionalDamage,shooter);
+            case "45ACP"->infoBullet=new Bullet45ACP(direction,additionalDamage,shooter);
+            case "5.56мм"->infoBullet=new Bullet556mm(direction,additionalDamage,shooter);
+            case "7.62х39мм"->infoBullet=new Bullet762mm(direction,additionalDamage,shooter);
+            default ->  infoBullet=new Bullet9mm(direction,additionalDamage,shooter);
         }
         return infoBullet;
     }
@@ -207,11 +209,11 @@ public abstract class Gun extends Item implements Firearm {
         if (angle < -180) angle += 360;
         return angle;
     }
-    protected Entity getEntityBullet(Point2D direction, double angle,Point2D startPos,EntityType type) {
+    protected Entity getEntityBullet(Point2D direction, double angle,Point2D startPos,EntityType type,MicroObjectAbstract shooter) {
         Entity bullet = new Entity();
         bullet.setPosition(startPos);
 
-        Bullet infoBullet = getInfoBullet(direction);
+        Bullet infoBullet = getInfoBullet(direction,shooter);
 
         Texture texture = infoBullet.getBulletTexture();
         texture.setRotate(angle);

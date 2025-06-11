@@ -12,6 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import model.objects.EntityType;
 import model.Player;
+import model.objects.microobjects.behaviour.RecruitAIComponent;
 
 import static utilies.ConsoleHelper.font;
 import static utilies.ConsoleHelper.smallFont;
