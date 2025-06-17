@@ -8,7 +8,8 @@ import jdk.jfr.Enabled;
 import model.objects.microobjects.MicroObjectAbstract;
 import utilies.ConsoleHelper;
 
-import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
@@ -23,10 +24,9 @@ public class RecruitAIComponent extends Component {
     private Point2D moveTarget;
     private MicroObjectAbstract attackTarget;
 
-    private final Queue<Command> commandQueue =new ArrayDeque<>();
+    private final List<Command> commandsList =new ArrayList<>();
 
     private Command currentCommand;
-    private Command alertCommand;
 
     @Override
     public void onAdded() {
@@ -61,9 +61,6 @@ public class RecruitAIComponent extends Component {
         this.moveTarget = target;
     }
 
-    public void setAlertCommand(Command alertCommand) {
-        this.alertCommand = alertCommand;
-    }
 
     public void moveToTarget(){
         if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(currentCommand.macroObjectAbstract())){
@@ -101,6 +98,7 @@ public class RecruitAIComponent extends Component {
                 // Якщо вже біля цілі — припиняємо рух
                 microObjectAbstract.stopPhysic();
                 moveTarget = null;
+                commandsList.remove(currentCommand);
                 currentCommand = null;
                 moving = false;
                 think();
@@ -116,17 +114,14 @@ public class RecruitAIComponent extends Component {
     }
 
     public void think(){
-        if (alertCommand != null) {
-            doSomething(alertCommand);
-        }
         if (currentCommand != null) {
             doSomething(currentCommand);
+        }
+        if (commandsList.isEmpty()) {
             return;
         }
-        if (commandQueue.isEmpty()) {
-            return;
-        }
-        currentCommand = commandQueue.poll();
+        commandsList.sort(Command::compareTo);
+        currentCommand = commandsList.getFirst();
     }
 
     private void doSomething(Command command) {
@@ -154,11 +149,11 @@ public class RecruitAIComponent extends Component {
     }
 
     public void addCommand(Command command){
-        commandQueue.add(command);
+        commandsList.add(command);
     }
 
-    public Queue<Command> getCommandQueue() {
-        return commandQueue;
+    public List<Command> getCommandsLits() {
+        return commandsList;
     }
 
     public static Point2D closestPointInRadius(Point2D a, Point2D b, double radius) {
@@ -226,6 +221,7 @@ public class RecruitAIComponent extends Component {
         firing = true;
         FXGL.runOnce(()->firing=false,Duration.seconds(1.2));
         if (attackTarget.isDead()){
+            commandsList.remove(currentCommand);
             currentCommand = null;
             attackTarget=null;
             moveTarget=null;

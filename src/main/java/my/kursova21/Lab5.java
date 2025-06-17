@@ -54,9 +54,12 @@ public class Lab5 extends Lab4{
         Soldier soldier = new Soldier(800,20);
         Entity entity1 = soldier.getNewEntity();
         FXGL.getGameWorld().addEntity(entity1);
-        recruit.addCommand(Command.getAttackCommand(soldier, (short) 5));
+        //recruit.addCommand(Command.getAttackCommand(soldier, (short) 5));
+        recruit.addCommand(Command.getMoveToCommand(new Point2D(0,500), (short) 100));
         soldier.addCommand(Command.getMoveToCommand(new Point2D(550,700), (short) 4));
-        recruit.addCommand(Command.getMoveToCommand(new Point2D(0,0), (short) 4));
+        recruit.addCommand(Command.getMoveToCommand(new Point2D(0,900), (short) 4));
+        recruit.addCommand(Command.getMoveToCommand(new Point2D(500,0), (short) 10));
+        recruit.addCommand(Command.getAttackCommand(soldier, (short) 10));
     }
 
     @Override

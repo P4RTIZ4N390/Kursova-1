@@ -433,8 +433,5 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         behaviourComponent.addCommand(command);
     }
 
-    public void addAlertCommand(Command command){
-        behaviourComponent.setAlertCommand(command);
-    }
 }
 

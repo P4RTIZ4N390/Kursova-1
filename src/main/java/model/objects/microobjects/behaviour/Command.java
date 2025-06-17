@@ -32,6 +32,6 @@ public record Command(Commands commandName,
 
     @Override
     public int compareTo(@NotNull Command o) {
-        return Short.compare(priority, o.priority);
+        return Short.compare(o.priority, priority);
     }
 }
