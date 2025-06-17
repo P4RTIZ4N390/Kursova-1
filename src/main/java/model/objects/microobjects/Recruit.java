@@ -10,6 +10,7 @@ import model.items.firearms.ammos.Ammo762mm;
 import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
+import model.objects.microobjects.behaviour.Command;
 import model.objects.microobjects.behaviour.EnemyAIComponent;
 import utilies.ConsoleHelper;
 import utilies.ImageLoader;
@@ -54,6 +55,12 @@ public class Recruit extends MicroObjectAbstract {//рекрут
         if(damageValue>0){
             setHealth(getHealth()-damageValue);
         }
+    }
+
+
+    public void getDamage(int damage,MicroObjectAbstract microObjectAbstract) {//Отримати шкоди, детальніше в Soldier
+       getDamage(damage);
+       addCommand(Command.getDefenseCommand(microObjectAbstract,Short.MAX_VALUE));
     }
 
 

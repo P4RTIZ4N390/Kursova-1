@@ -38,11 +38,6 @@ public class Soldier extends Recruit {
     }
 
     @Override
-    public void takeDamage(MicroObjectAbstract microObjectAbstract) {
-
-    }
-
-    @Override
     public void getDamage(int damage) {
         int damageValue = (int) Math.floor(damage-damage/(100/getArmor()));
         if(damageValue>0){

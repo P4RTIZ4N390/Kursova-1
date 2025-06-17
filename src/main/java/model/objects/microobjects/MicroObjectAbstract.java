@@ -51,6 +51,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     private double armor;//Math.floor(damage-damage/(100/getArmor) damage it's received damage
     protected Inventory inventory;//it's a place where keeping items
     private double experiencePoint;//Amount of xp, what player received
+    private boolean wasActive = true;
     protected final int speed;
 
     private final EntityType type;
@@ -90,8 +91,6 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     public MicroObjectAbstract(int x, int y) {
         this("Creature",100,5,Inventory.getInventory(50),150,x,y,1,EntityType.ENEMY);
     }
-
-    private boolean wasActive = true;
 
     @Override
     public void onUpdate(double tpf) {
@@ -434,5 +433,8 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         behaviourComponent.addCommand(command);
     }
 
+    public void addAlertCommand(Command command){
+        behaviourComponent.setAlertCommand(command);
+    }
 }
 

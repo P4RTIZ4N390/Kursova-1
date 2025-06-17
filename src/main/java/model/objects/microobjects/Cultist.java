@@ -21,16 +21,19 @@ public class Cultist extends Soldier {//Окультист
     private final int id;
     private static int idCounter = 0;
 
-    public Cultist(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed) {//Справжній конструктор
+    private int mana;
+
+    public Cultist(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed,int mana) {//Справжній конструктор
         super(creatureName, health, armor, inventory, experiencePoint, x, y, speed);
         getInventory().clear();
         getInventory().addItem(new FNP90());
         setCurrentItem("FN P90");
         id = idCounter++;
+        this.mana = mana;
     }
 
     public Cultist() {
-        this("Cultist",200,5.5,Inventory.getInventory(100,new FNP90()), RandomUtil.getRandomExperiencePoint(150),0,0,200);//Вимога задачі
+        this("Cultist",200,5.5,Inventory.getInventory(100,new FNP90()), RandomUtil.getRandomExperiencePoint(150),0,0,200,1500);//Вимога задачі
     }
 
     public Cultist(int x, int y) {
@@ -126,7 +129,7 @@ public class Cultist extends Soldier {//Окультист
 
     @Override
     public Object clone() {
-        return new Cultist(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(this.getInventoryMax()),getExperiencePoint(),getX(),getY(),speed);
+        return new Cultist(getCreatureName(),getHealth(),getArmor(),Inventory.getInventory(this.getInventoryMax()),getExperiencePoint(),getX(),getY(),speed,mana);
     }
 
     @Override

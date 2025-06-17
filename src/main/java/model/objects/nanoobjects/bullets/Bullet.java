@@ -37,6 +37,9 @@ public abstract class  Bullet extends Component {
         return attackDamage;
     }
 
+    public MicroObjectAbstract getShooter() {
+        return shooter;
+    }
 
     public void destroy() {
         entity.removeFromWorld();

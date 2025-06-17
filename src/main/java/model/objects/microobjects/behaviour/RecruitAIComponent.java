@@ -26,6 +26,7 @@ public class RecruitAIComponent extends Component {
     private final Queue<Command> commandQueue =new ArrayDeque<>();
 
     private Command currentCommand;
+    private Command alertCommand;
 
     @Override
     public void onAdded() {
@@ -60,6 +61,10 @@ public class RecruitAIComponent extends Component {
         this.moveTarget = target;
     }
 
+    public void setAlertCommand(Command alertCommand) {
+        this.alertCommand = alertCommand;
+    }
+
     public void moveToTarget(){
         if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(currentCommand.macroObjectAbstract())){
             microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
@@ -76,7 +81,7 @@ public class RecruitAIComponent extends Component {
             double dy = ty - y;
 
             // Зупиняємо поточний рух, щоб не було зміщення по двох осях
-            microObjectAbstract.stopPhysic();
+            microObjectAbstract.stop();
 
             double threshold = 10.0;
 
@@ -111,8 +116,11 @@ public class RecruitAIComponent extends Component {
     }
 
     public void think(){
+        if (alertCommand != null) {
+            doSomething(alertCommand);
+        }
         if (currentCommand != null) {
-            doSomething();
+            doSomething(currentCommand);
             return;
         }
         if (commandQueue.isEmpty()) {
@@ -121,19 +129,26 @@ public class RecruitAIComponent extends Component {
         currentCommand = commandQueue.poll();
     }
 
-    private void doSomething(){
-        switch (currentCommand.commandName()){
+    private void doSomething(Command command) {
+        switch (command.commandName()){
             case MOVE ->{
-                moveTarget=currentCommand.macroObjectAbstract()!=null?currentCommand.macroObjectAbstract().getPosition():null;
-                moveTarget=moveTarget!=null?moveTarget:currentCommand.toMove();
+                moveTarget=command.macroObjectAbstract()!=null?command.macroObjectAbstract().getPosition():null;
+                moveTarget=moveTarget!=null?moveTarget:command.toMove();
                 moveToTarget();
             }
             case ATTACK -> {
-                attackTarget=currentCommand.microObjectAbstract();
+                attackTarget=command.microObjectAbstract();
                 moveTarget=closestPointInRadius(microObjectAbstract.getPosition(),attackTarget.getPosition(),250);
                 moveToAttackTarget();
                 attackTarget();
             }
+            case DEFENSE ->{
+                attackTarget=command.microObjectAbstract();
+                moveTarget=closestPointInRadius(microObjectAbstract.getPosition(),attackTarget.getPosition(),250);
+                moveToTarget();
+                attackTarget();
+            }
+
             default -> ConsoleHelper.writeMessageInLabelInRightCorner("Невідома команда",5,1920,1080);
         }
     }
@@ -189,7 +204,7 @@ public class RecruitAIComponent extends Component {
                 }
             } else {
                 // Якщо вже біля цілі — припиняємо рух
-                microObjectAbstract.stopPhysic();
+                microObjectAbstract.stop();
                 moveTarget = null;
                 moving = false;
                 return;
@@ -210,5 +225,10 @@ public class RecruitAIComponent extends Component {
         microObjectAbstract.fire(attackTarget.getPosition());
         firing = true;
         FXGL.runOnce(()->firing=false,Duration.seconds(1.2));
+        if (attackTarget.isDead()){
+            currentCommand = null;
+            attackTarget=null;
+            moveTarget=null;
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
+import com.almasb.fxgl.physics.CollisionHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -22,9 +23,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import model.TriggerComponent;
+import model.objects.EntityType;
 import model.objects.macroobjects.*;
 import model.objects.microobjects.*;
 import model.objects.microobjects.behaviour.Command;
+import model.objects.nanoobjects.bullets.Bullet;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
 
@@ -51,8 +54,9 @@ public class Lab5 extends Lab4{
         Soldier soldier = new Soldier(800,20);
         Entity entity1 = soldier.getNewEntity();
         FXGL.getGameWorld().addEntity(entity1);
-        recruit.addCommand(Command.getAttackCommand(soldier));
-        soldier.addCommand(Command.getMoveToCommand(new Point2D(550,700)));
+        recruit.addCommand(Command.getAttackCommand(soldier, (short) 5));
+        soldier.addCommand(Command.getMoveToCommand(new Point2D(550,700), (short) 4));
+        recruit.addCommand(Command.getMoveToCommand(new Point2D(0,0), (short) 4));
     }
 
     @Override
@@ -449,7 +453,29 @@ public class Lab5 extends Lab4{
 
     @Override
     protected void initPhysics() {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.ENEMY_BULLET, EntityType.ENEMY) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity enemy) {
 
+
+                Bullet bulletComponent = bullet.getComponents().stream()
+                        .filter(Bullet.class::isInstance)
+                        .map(Bullet.class::cast)
+                        .findFirst()
+                        .orElse(null);
+                Recruit enemyComponent = enemy.getComponents().stream()
+                        .filter(Recruit.class::isInstance)
+                        .map(Recruit.class::cast)
+                        .findFirst()
+                        .orElse(null);
+
+                assert bulletComponent != null;
+                assert enemyComponent != null;
+                if (bulletComponent.getShooter().equals(enemyComponent)) return;
+                enemyComponent.getDamage(bulletComponent.getAttackDamage(),bulletComponent.getShooter()); // Наносимо шкоду
+                bullet.removeFromWorld(); // Видаляємо кулю
+            }
+        });
         super.initPhysics();
     }
 }

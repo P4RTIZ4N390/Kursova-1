@@ -37,7 +37,9 @@ import utilies.ConsoleHelper;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameWorld;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
@@ -165,18 +167,7 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("moveOnArrowRight") {
             @Override
             protected void onActionBegin() {
-                List<Entity> entityList = FXGL.getGameWorld().getEntities()
-                        .stream()
-                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                        .toList();
-                for (Entity entity : entityList) {
-                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
-                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
-                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
-                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
-                        microObjectAbstract.moveRight();//Переміщуємо вправо, якщо об'єкт активний
-                    }
-                }
+                forEachActive(MicroObjectAbstract::moveRight);
             }
 
             @Override
@@ -188,18 +179,7 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("moveOnArrowLeft") {
             @Override
             protected void onActionBegin() {
-                List<Entity> entityList = FXGL.getGameWorld().getEntities()
-                        .stream()
-                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                        .toList();
-                for (Entity entity : entityList) {
-                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
-                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
-                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
-                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
-                        microObjectAbstract.moveLeft();//Переміщуємо вліво, якщо об'єкт активний
-                    }
-                }
+                forEachActive(MicroObjectAbstract::moveLeft);
             }
 
             @Override
@@ -211,18 +191,7 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("moveOnArrowUp") {
             @Override
             protected void onActionBegin() {
-                List<Entity> entityList = FXGL.getGameWorld().getEntities()
-                        .stream()
-                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                        .toList();
-                for (Entity entity : entityList) {
-                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
-                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
-                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
-                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
-                        microObjectAbstract.moveUp();//Переміщуємо верх, якщо об'єкт активний
-                    }
-                }
+                forEachActive(MicroObjectAbstract::moveUp);
             }
 
             @Override
@@ -234,18 +203,7 @@ public class Lab4 extends GameApplication {
         input.addAction(new UserAction("moveOnArrowDown") {
             @Override
             protected void onActionBegin() {
-                List<Entity> entityList = FXGL.getGameWorld().getEntities()
-                        .stream()
-                        .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                        .toList();
-                for (Entity entity : entityList) {
-                    MicroObjectAbstract microObjectAbstract = entity.getComponents().stream()
-                            .filter(MicroObjectAbstract.class::isInstance) // Перевіряємо, чи компонент є MicroObjectAbstract
-                            .map(MicroObjectAbstract.class::cast).findFirst().orElse(null); // Перетворюємо компонент у MicroObjectAbstract
-                    if (microObjectAbstract != null && microObjectAbstract.isActive()) {
-                        microObjectAbstract.moveDown();//Переміщуємо вниз, якщо об'єкт активний
-                    }
-                }
+                forEachActive(MicroObjectAbstract::moveDown);
             }
 
             @Override
@@ -359,36 +317,25 @@ public class Lab4 extends GameApplication {
      */
     public void setBufferLabel(String bufferLabelText) {
         //Створення й оновлення рядка буфера
-        try {//Спроба видалити рядок буфера
-            FXGL.getGameScene().removeUINode(bufferLabel);
-        } catch (Exception ignored) {}
         //Створення нового рядка буфера
-        bufferLabel = new Label(bufferLabelText);
+        bufferLabel.setText(bufferLabelText);
         //Встановлення стилю
         bufferLabel.setFont(font);
         bufferLabel.setTextFill(Color.LIGHTGREEN);
         //Розміщення
         bufferLabel.setLayoutX(0);
         bufferLabel.setLayoutY(0);
-        //Додавання на сцену рядка буфера
-        FXGL.getGameScene().addUINode(bufferLabel);
+
     }
 
     public void setAmountOfActiveMicroObjects() {
-        try {//Спроба видалити рядок буфера
-            FXGL.getGameScene().removeUINode(amountOfActiveMicroObjects);
-        } catch (Exception ignored) {
-        }
-        // Створення нового рядку кількості мікроОбєктів
-        amountOfActiveMicroObjects = new Label("Кількість активних мікрообєктів: " + amountOfActive + ".");
+        amountOfActiveMicroObjects.setText("Кількість активних мікрообєктів: " + amountOfActive + ".");
         //Встановлення стилю
         amountOfActiveMicroObjects.setFont(font);
         amountOfActiveMicroObjects.setTextFill(Color.LIGHTGREEN);
         //Розміщення
         amountOfActiveMicroObjects.setLayoutX(0);
         amountOfActiveMicroObjects.setLayoutY(30);
-        //Додавання на сцену рядка кількості мікроОбєктів
-        FXGL.getGameScene().addUINode(amountOfActiveMicroObjects);
     }
 
     /**Оновлення списку активних мікроОбєктів
@@ -609,7 +556,7 @@ public class Lab4 extends GameApplication {
                 case CULTIST -> {
                     if (patternYesSelected) microObjectAbstract = new Cultist(x,y);
                     else
-                        microObjectAbstract = new Cultist(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped);
+                        microObjectAbstract = new Cultist(name, healt, arm, Inventory.getInventory(max, new AKM()), exper, x, y, sped,1500);
                 }
                 default -> {
                     if (patternYesSelected) microObjectAbstract = new Recruit(x,y);
@@ -1010,5 +957,27 @@ public class Lab4 extends GameApplication {
         if (y < 0) y = 0;
 
         return new Point(x, y);
+    }
+
+    protected  void forEachActive(Consumer<MicroObjectAbstract> action) {
+        FXGL.getGameWorld().getEntities().stream()
+                .filter(e -> e.hasComponent(TriggerComponent.class))
+                .flatMap(e -> e.getComponents().stream())
+                .filter(Objects::nonNull)
+                .filter(MicroObjectAbstract.class::isInstance)
+                .map(MicroObjectAbstract.class::cast)
+                .filter(MicroObjectAbstract::isActive)
+                .forEach(action);
+    }
+
+    @Override
+    protected void initUI() {
+        amountOfActiveMicroObjects = new Label("Кількість активних мікрообєктів: " + amountOfActive + ".");
+        bufferLabel=new Label();
+        //Додавання на сцену рядка кількості мікроОбєктів
+        FXGL.getGameScene().addUINode(amountOfActiveMicroObjects);
+        //Додавання на сцену рядка буфера
+        FXGL.getGameScene().addUINode(bufferLabel);
+        super.initUI();
     }
 }
