@@ -6,6 +6,7 @@ import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import javafx.geometry.Point2D;
+import model.items.firearms.ammos.Ammo57mm;
 import model.items.firearms.smg.FNP90;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
@@ -28,12 +29,13 @@ public class Cultist extends Soldier {//Окультист
         getInventory().clear();
         getInventory().addItem(new FNP90());
         setCurrentItem("FN P90");
+        getInventory().addItems(new Ammo57mm(),200);
         id = idCounter++;
         this.mana = mana;
     }
 
     public Cultist() {
-        this("Cultist",200,5.5,Inventory.getInventory(100,new FNP90()), RandomUtil.getRandomExperiencePoint(150),0,0,200,1500);//Вимога задачі
+        this("Cultist",200,55,Inventory.getInventory(100,new FNP90()), RandomUtil.getRandomExperiencePoint(150),0,0,200,1500);//Вимога задачі
     }
 
     public Cultist(int x, int y) {
@@ -100,7 +102,7 @@ public class Cultist extends Soldier {//Окультист
 
     @Override
     public void stop() {
-        switch (direction) {
+        switch (getDirection()) {
             case RIGHT->{
                 mainTexture.loopAnimationChannel(animIdleRight);
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+30);

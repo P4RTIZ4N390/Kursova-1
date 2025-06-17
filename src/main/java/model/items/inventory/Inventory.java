@@ -266,5 +266,11 @@ public class Inventory implements Comparable<Inventory>,Cloneable{//клас-м�
         items.clear();
     }
 
+    public boolean checkForItem(Item item) {
+        return items.containsKey(item) && items.get(item) > 0;
+    }
 
+    public boolean checkForItem(String itemName) {
+        return items.containsKey(checkItemAndReturn(itemName)) && items.get(checkItemAndReturn(itemName)) > 0;
+    }
 }

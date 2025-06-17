@@ -84,9 +84,6 @@ public class Lab4 extends GameApplication {
         spawn("Crypt", 1000, 800);
         spawn("Dormitory", 1200, 800);
         spawn("Cave", 1400,800 );
-        spawn("Recruit", 300, 500);
-        spawn("Soldier", 500, 500);
-        spawn("Cultist", 800, 300);
         setupControls();
     }
 
@@ -330,6 +327,9 @@ public class Lab4 extends GameApplication {
 
     public void setAmountOfActiveMicroObjects() {
         amountOfActiveMicroObjects.setText("Кількість активних мікрообєктів: " + amountOfActive + ".");
+        if (amountOfActive == 0) {
+            amountOfActiveMicroObjects.setText("");
+        }
         //Встановлення стилю
         amountOfActiveMicroObjects.setFont(font);
         amountOfActiveMicroObjects.setTextFill(Color.LIGHTGREEN);
@@ -978,6 +978,7 @@ public class Lab4 extends GameApplication {
         FXGL.getGameScene().addUINode(amountOfActiveMicroObjects);
         //Додавання на сцену рядка буфера
         FXGL.getGameScene().addUINode(bufferLabel);
+        setAmountOfActiveMicroObjects();
         super.initUI();
     }
 }

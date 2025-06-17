@@ -65,7 +65,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected AnimatedTexture mainTexture;
     protected AnimatedTexture weaponTexture;
     protected AnimationChannel animIdleRight,animIdleLeft,animIdleDown,animIdleUp,animWalkRight, animWalkLeft, animWalkUp, animWalkDown;
-    protected Direction direction=Direction.RIGHT;
+    private Direction direction=Direction.RIGHT;
     protected Label nameLabel;
 
     protected PhysicsComponent physics=new PhysicsComponent();
@@ -202,6 +202,14 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         this.macroObjectAbstract = macroObjectAbstract;
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
     public boolean isDead() {
         return health <= 0;
     }
@@ -295,6 +303,14 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
                 return;
             }
             firing= gun.IsAutomatic();
+
+            Direction directionWhereFiring=Gun.getWhereFireInDirection(Math.toDegrees(Math.atan2(target.getY(), target.getX())));
+
+            if (direction!=directionWhereFiring){
+                direction=directionWhereFiring;
+                stop();
+            }
+
             gun.fire(this,target, getInventory(),direction);
             if (gun.IsAutomatic()) {
                 FXGL.run(() -> {
@@ -433,5 +449,8 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         behaviourComponent.addCommand(command);
     }
 
+    public boolean checkForAmmo(){
+        return inventory.checkForItem(getInventory().getCurrentGun().getCaliber());
+    }
 }
 

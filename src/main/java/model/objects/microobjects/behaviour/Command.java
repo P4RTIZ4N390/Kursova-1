@@ -21,10 +21,6 @@ public record Command(Commands commandName,
         return new Command(Commands.MOVE,macroObjectAbstract,null,null,priority);
     }
 
-    public static Command getMoveToMicroObjectCommand(MicroObjectAbstract microObjectAbstract,short priority) {
-        return new Command(Commands.MOVE,null,microObjectAbstract,null,priority);
-    }
-
     public static Command getMoveToCommand(Point2D point,short priority) {
         return new Command(Commands.MOVE,null,null,point,priority);
     }

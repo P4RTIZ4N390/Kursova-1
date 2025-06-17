@@ -103,7 +103,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
     }
 
     public void stop() {
-        switch (direction) {
+        switch (getDirection()) {
             case RIGHT->{
                 mainTexture.loopAnimationChannel(animIdleRight);
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+33);

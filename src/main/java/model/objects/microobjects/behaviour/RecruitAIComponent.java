@@ -66,6 +66,8 @@ public class RecruitAIComponent extends Component {
         if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(currentCommand.macroObjectAbstract())){
             microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
         }
+
+        if (microObjectAbstract.isDead()) return;
         if (moveTarget != null) {
 
             moving = true;
@@ -114,6 +116,7 @@ public class RecruitAIComponent extends Component {
     }
 
     public void think(){
+        if (microObjectAbstract.isDead()) return;
         if (currentCommand != null) {
             doSomething(currentCommand);
         }
@@ -125,6 +128,7 @@ public class RecruitAIComponent extends Component {
     }
 
     private void doSomething(Command command) {
+        if (microObjectAbstract.isDead()) return;
         switch (command.commandName()){
             case MOVE ->{
                 moveTarget=command.macroObjectAbstract()!=null?command.macroObjectAbstract().getPosition():null;
@@ -161,7 +165,7 @@ public class RecruitAIComponent extends Component {
         double distance = dir.magnitude();
 
         if (distance <= radius) {
-            return a; // А вже в межах радіуса
+            return null; // А вже в межах радіуса
         }
 
         // нормалізуємо і множимо на R
@@ -169,6 +173,7 @@ public class RecruitAIComponent extends Component {
     }
 
     public void moveToAttackTarget(){
+        if (microObjectAbstract.isDead()) return;
         if (moveTarget != null) {
 
             moving = true;
@@ -183,7 +188,7 @@ public class RecruitAIComponent extends Component {
             // Зупиняємо поточний рух, щоб не було зміщення по двох осях
             microObjectAbstract.stopPhysic();
 
-            double threshold = 15.0;
+            double threshold = 25.0;
 
             if (Math.abs(dx) > threshold) {
                 if (dx > 0) {
@@ -215,16 +220,24 @@ public class RecruitAIComponent extends Component {
 
 
     public void attackTarget(){
+        if (microObjectAbstract.isDead()) return;
         if (attackTarget==null) return;
+        if (checkForDeadAndDo()) return;
         if (firing) return;
         microObjectAbstract.fire(attackTarget.getPosition());
         firing = true;
         FXGL.runOnce(()->firing=false,Duration.seconds(1.2));
-        if (attackTarget.isDead()){
+        checkForDeadAndDo();
+    }
+
+    private boolean checkForDeadAndDo(){
+        if (attackTarget.isDead() || !microObjectAbstract.checkForAmmo()){
             commandsList.remove(currentCommand);
             currentCommand = null;
             attackTarget=null;
             moveTarget=null;
+            return true;
         }
+        return false;
     }
 }

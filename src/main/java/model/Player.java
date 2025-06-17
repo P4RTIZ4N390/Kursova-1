@@ -182,7 +182,7 @@ public class Player extends MicroObjectAbstract {//singleton pattern
 
 
     public void stop() {
-        switch (direction) {
+        switch (getDirection()) {
             case RIGHT->{
                 mainTexture.loopAnimationChannel(animIdleRight);
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25);
@@ -313,12 +313,12 @@ public class Player extends MicroObjectAbstract {//singleton pattern
 
                     Direction directionWhereFiring=Gun.getWhereFireInDirection(Math.toDegrees(Math.atan2(mousePos.getY(), mousePos.getX())));
 
-                    if (direction!=directionWhereFiring){
-                        direction=directionWhereFiring;
+                    if (getDirection()!=directionWhereFiring){
+                        setDirection(directionWhereFiring);
                         stop();
                     }
 
-                    wristMountedUnderBarrelFirearm.fire(Player.getInstance(),FXGL.getInput().getMousePositionUI(),getInventory(),direction);
+                    wristMountedUnderBarrelFirearm.fire(Player.getInstance(),FXGL.getInput().getMousePositionUI(),getInventory(),getDirection());
                 }
             }
         },KeyCode.E);
@@ -340,17 +340,17 @@ public class Player extends MicroObjectAbstract {//singleton pattern
 
                         Direction directionWhereFiring=Gun.getWhereFireInDirection(Math.toDegrees(Math.atan2(mousePos.getY(), mousePos.getX())));
 
-                        if (direction!=directionWhereFiring){
-                            direction=directionWhereFiring;
+                        if (getDirection()!=directionWhereFiring){
+                            setDirection(directionWhereFiring);
                             stop();
                         }
 
-                        gun.fireForPlayer(getX(), getY(), FXGL.getInput().getMousePositionWorld(), getInventory(),direction);
+                        gun.fireForPlayer(getX(), getY(), FXGL.getInput().getMousePositionWorld(), getInventory(),getDirection());
 
                         if (gun.IsAutomatic()) {
                             FXGL.run(() -> {
                                 if (firing) {
-                                    gun.fireForPlayer(getX(), getY(), FXGL.getInput().getMousePositionWorld(), getInventory(),direction);
+                                    gun.fireForPlayer(getX(), getY(), FXGL.getInput().getMousePositionWorld(), getInventory(),getDirection());
                                 }
                             }, Duration.seconds(gun.getFireRate())); // Час між пострілами (0.1 сек = 10 пострілів за секунду)
                         }

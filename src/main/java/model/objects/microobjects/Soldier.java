@@ -1,6 +1,7 @@
 package model.objects.microobjects;
 
 import com.almasb.fxgl.texture.AnimatedTexture;
+import model.items.firearms.ammos.Ammo57mm;
 import model.items.firearms.smg.FNP90;
 import model.items.inventory.Inventory;
 import utilies.ConsoleHelper;
@@ -15,7 +16,7 @@ public class Soldier extends Recruit {
     private static int idCounter = 0;
 
     public Soldier() {
-        this("Soldier",150,25,Inventory.getInventory(50), RandomUtil.getRandomExperiencePoint(100),0,0,180);
+        this("Soldier",150,45,Inventory.getInventory(50), RandomUtil.getRandomExperiencePoint(100),0,0,180);
     }
 
     public Soldier(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed) {
@@ -23,6 +24,7 @@ public class Soldier extends Recruit {
         getInventory().clear();
         getInventory().addItem(new FNP90());
         setCurrentItem("FN P90");
+        getInventory().addItems(new Ammo57mm(),200);
         id=idCounter++;
     }
 
@@ -86,7 +88,7 @@ public class Soldier extends Recruit {
 
     @Override
     public void stop() {
-        switch (direction) {
+        switch (getDirection()) {
             case RIGHT->{
                 mainTexture.loopAnimationChannel(animIdleRight);
                 mainTexture.setTranslateX(-mainTexture.getImage().getHeight() * 0.25+45);

@@ -144,7 +144,6 @@ public abstract class Gun extends Item implements Firearm {
             direction=direction.add(RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount()),RandomUtil.getRandomDoubleBetweenMinusAndPlus(getSpread_Amount())).normalize();
             double angle = Math.toDegrees(Math.atan2(direction.getY(), direction.getX()));
 
-            if (!directionOfCreature.equals(getWhereFireInDirection(angle))) return;
 
             FXGL.getGameWorld().addEntity(getEntityBullet(direction,angle,startPos,EntityType.ENEMY_BULLET,shooter));
             leftAmmo--;
