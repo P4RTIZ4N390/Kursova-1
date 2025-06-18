@@ -23,7 +23,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
     private static int idCounter = 0;
 
     public Recruit(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y,int speed) {//Справжній конструктор
-        super(creatureName, health, armor, inventory, experiencePoint, x, y,speed, EntityType.ENEMY);
+        super(creatureName, health, armor, inventory, experiencePoint, x, y,speed, EntityType.MICROOBJECT);
         id=idCounter++;
     }
 
@@ -145,7 +145,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
 
         Entity recruitE = FXGL.entityBuilder()
                 .with(recruit) // додаємо Creature
-                .type(EntityType.ENEMY)
+                .type(EntityType.MICROOBJECT)
                 .at(getX(),getY())
                 .build();
 

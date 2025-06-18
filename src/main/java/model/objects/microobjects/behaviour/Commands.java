@@ -1,5 +1,5 @@
 package model.objects.microobjects.behaviour;
 
 public enum Commands {
-    ATTACK,MOVE,DEFENSE,PATROL
+    MOVE,ATTACK,DEFENSE, MOVE_TO_MACROOBJECT
 }

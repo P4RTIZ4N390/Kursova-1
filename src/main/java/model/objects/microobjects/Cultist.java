@@ -139,7 +139,7 @@ public class Cultist extends Soldier {//Окультист
         MicroObjectAbstract cultist=this;
         Entity cultistE = FXGL.entityBuilder()
                 .with(cultist) // додаємо Creature
-                .type(EntityType.ENEMY)
+                .type(EntityType.MICROOBJECT)
                 .at(getX(),getY())
                 .build();
 

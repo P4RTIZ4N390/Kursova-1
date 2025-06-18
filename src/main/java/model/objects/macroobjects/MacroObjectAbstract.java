@@ -15,6 +15,7 @@ import utilies.ConsoleHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static my.kursova21.Lab4.HEIGHT;
 import static my.kursova21.Lab4.WIDTH;
@@ -36,7 +37,7 @@ public abstract class MacroObjectAbstract extends Component {
         loadCreatures();
     }
 
-    private final List<MicroObjectAbstract> microObjectAbstracts =new ArrayList<>();
+    private final List<MicroObjectAbstract> microObjectAbstracts =new CopyOnWriteArrayList<>();
 
     public List<MicroObjectAbstract> getCreatures() {
         return microObjectAbstracts;
@@ -101,6 +102,12 @@ public abstract class MacroObjectAbstract extends Component {
         entity.addComponent(new CollidableComponent(true));
         entity.addComponent(physicsComponent);
         entity.addComponent(new TriggerComponent(50));
+    }
+
+    @Override
+    public void onUpdate(double tpf) {
+        microObjectAbstracts.forEach(microObject -> microObject.onUpdate(tpf));
+        super.onUpdate(tpf);
     }
 
     @Override

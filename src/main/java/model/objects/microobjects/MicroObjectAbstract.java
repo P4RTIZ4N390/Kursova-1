@@ -11,7 +11,6 @@ import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
 import com.almasb.fxgl.texture.*;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
-import javafx.scene.web.HTMLEditorSkin;
 import javafx.util.Duration;
 import model.Direction;
 import model.TriggerComponent;
@@ -21,7 +20,6 @@ import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.macroobjects.MacroObjectAbstract;
 import model.objects.microobjects.behaviour.Command;
-import model.objects.microobjects.behaviour.Commands;
 import model.objects.microobjects.behaviour.RecruitAIComponent;
 import my.kursova21.Lab4;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +67,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected Label nameLabel;
 
     protected PhysicsComponent physics=new PhysicsComponent();
-    protected RecruitAIComponent behaviourComponent;
+    protected RecruitAIComponent behaviourComponent=addBehaviour();
 
     public MicroObjectAbstract(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed, EntityType type) {//true constructor
         super();
@@ -85,17 +83,24 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     }
 
     public MicroObjectAbstract() {//task condition
-        this("Creature",100,5,Inventory.getInventory(50),150,0,0,1,EntityType.ENEMY);
+        this("Creature",100,5,Inventory.getInventory(50),150,0,0,1,EntityType.MICROOBJECT);
     }
 
     public MicroObjectAbstract(int x, int y) {
-        this("Creature",100,5,Inventory.getInventory(50),150,x,y,1,EntityType.ENEMY);
+        this("Creature",100,5,Inventory.getInventory(50),150,x,y,1,EntityType.MICROOBJECT);
     }
 
     @Override
     public void onUpdate(double tpf) {
-            this.x = (int) entity.getX();
-            this.y = (int) entity.getY();
+        if (isDead()){
+            FXGL.getGameWorld().removeEntity(entity);
+        }
+        behaviourComponent.onUpdate(tpf);
+
+        if (entity==null)return;
+
+        this.x = (int) entity.getX();
+        this.y = (int) entity.getY();
 
         if (active && !wasActive) {
             mainTexture.loop();
@@ -229,7 +234,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     @Override
     public void onAdded() {
         super.onAdded();
-        physics.setBodyType(BodyType.KINEMATIC);
+        physics.setBodyType(BodyType.DYNAMIC);
         entity.addComponent(new TriggerComponent(RADIUS));
         entity.addComponent(new CollidableComponent(true));
         entity.addComponent(physics);
@@ -237,7 +242,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         loadAnimatedTexture();
         entity.getViewComponent().addChild(mainTexture);// або твоя текстура істоти
         updateItem();
-        addBehaviour();
+        entity.addComponent(behaviourComponent);
         entity.getViewComponent().addChild(weaponTexture);
     }
 
@@ -296,6 +301,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     }
 
     public void fire(Point2D target){
+        if (entity==null) return;
         boolean firing;
         Item item = inventory.getCurrentGun();
         if (item instanceof Gun gun) {
@@ -316,6 +322,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
                 FXGL.run(() -> {
                     if (firing) {
                         gun.fire(this, target, getInventory(),direction);
+
                     }
                 }, Duration.seconds(gun.getFireRate()), RandomUtil.getRandomInt(5,10)); // Час між пострілами (0.1 сек = 10 пострілів за секунду)
             }
@@ -435,10 +442,10 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         return macroObjectAbstract!=null && macroObjectAbstract.getCreatures().contains(this);
     }
 
-    private void addBehaviour(){
-        if (behaviourComponent!=null) return;
-        behaviourComponent =new RecruitAIComponent();
-        entity.addComponent(behaviourComponent);
+    private RecruitAIComponent addBehaviour(){
+        if (behaviourComponent!=null) return behaviourComponent;
+        behaviourComponent =new RecruitAIComponent(this);
+        return behaviourComponent;
     }
 
     public Point2D getPosition() {

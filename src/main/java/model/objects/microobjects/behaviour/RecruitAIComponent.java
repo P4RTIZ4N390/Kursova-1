@@ -17,7 +17,7 @@ import java.util.Queue;
 @Enabled
 public class RecruitAIComponent extends Component {
 
-    private MicroObjectAbstract microObjectAbstract;
+    private final MicroObjectAbstract microObjectAbstract;
     private boolean moving = false;
     private boolean firing = false;
 
@@ -28,13 +28,12 @@ public class RecruitAIComponent extends Component {
 
     private Command currentCommand;
 
+    public RecruitAIComponent(MicroObjectAbstract microObjectAbstract) {
+        this.microObjectAbstract = microObjectAbstract;
+    }
+
     @Override
     public void onAdded() {
-        microObjectAbstract = entity.getComponents().stream()
-                .filter(MicroObjectAbstract.class::isInstance)
-                .map(MicroObjectAbstract.class::cast)
-                .findFirst()
-                .orElse(null);
     }
 
     public MicroObjectAbstract getMicroObjectAbstract() {
@@ -46,7 +45,7 @@ public class RecruitAIComponent extends Component {
         if (microObjectAbstract == null) {
             onAdded();
         }
-        if ( microObjectAbstract.isDead() || microObjectAbstract.isInMacroObject()) {
+        if ( microObjectAbstract.isDead()) {
             return;
         }
         think();
@@ -63,11 +62,12 @@ public class RecruitAIComponent extends Component {
 
 
     public void moveToTarget(){
-        if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(currentCommand.macroObjectAbstract())){
+        if (microObjectAbstract.isInMacroObject()){
             microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
+            return;
         }
 
-        if (microObjectAbstract.isDead()) return;
+        if (microObjectAbstract.isDead() ) return;
         if (moveTarget != null) {
 
             moving = true;
@@ -136,12 +136,20 @@ public class RecruitAIComponent extends Component {
                 moveToTarget();
             }
             case ATTACK -> {
+                if (command.microObjectAbstract()==null){
+                    commandsList.remove(command);
+                    return;
+                }
                 attackTarget=command.microObjectAbstract();
                 moveTarget=closestPointInRadius(microObjectAbstract.getPosition(),attackTarget.getPosition(),250);
                 moveToAttackTarget();
                 attackTarget();
             }
             case DEFENSE ->{
+                if (command.microObjectAbstract()==null){
+                    commandsList.remove(command);
+                    return;
+                }
                 attackTarget=command.microObjectAbstract();
                 moveTarget=closestPointInRadius(microObjectAbstract.getPosition(),attackTarget.getPosition(),250);
                 moveToTarget();
@@ -173,6 +181,10 @@ public class RecruitAIComponent extends Component {
     }
 
     public void moveToAttackTarget(){
+        if (microObjectAbstract.isInMacroObject()){
+            microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
+            return;
+        }
         if (microObjectAbstract.isDead()) return;
         if (moveTarget != null) {
 

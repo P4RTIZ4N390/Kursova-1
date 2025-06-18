@@ -8,13 +8,10 @@ import com.almasb.fxgl.physics.HitBox;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import model.objects.EntityType;
 import model.Player;
-import model.objects.microobjects.behaviour.RecruitAIComponent;
 
-import static utilies.ConsoleHelper.font;
 import static utilies.ConsoleHelper.smallFont;
 
 public class MicroObjectsFactory implements EntityFactory {
@@ -46,7 +43,7 @@ public class MicroObjectsFactory implements EntityFactory {
         Entity cultistE =FXGL.entityBuilder()
                 .at(data.getX(), data.getY())
                 .with(cultist) // додаємо Creature
-                .type(EntityType.ENEMY)
+                .type(EntityType.MICROOBJECT)
                 .build();
 
         cultistE.getBoundingBoxComponent().addHitBox(new HitBox(
@@ -67,7 +64,7 @@ public class MicroObjectsFactory implements EntityFactory {
         Entity recruitE =FXGL.entityBuilder()
                 .at(data.getX(), data.getY())
                 .with(recruit) // додаємо Creature
-                .type(EntityType.ENEMY)
+                .type(EntityType.MICROOBJECT)
                 .build();
 
         recruitE.getBoundingBoxComponent().addHitBox(new HitBox(
@@ -89,7 +86,7 @@ public class MicroObjectsFactory implements EntityFactory {
         Entity soldierE=FXGL.entityBuilder()
                 .at(data.getX(), data.getY())
                 .with(soldier)
-                .type(EntityType.ENEMY)
+                .type(EntityType.MICROOBJECT)
                 .build();
         soldierE.getBoundingBoxComponent().addHitBox(new HitBox(
                 new Point2D(0, -5), // Зміщення хитбоксу (всередину спрайта)

@@ -462,7 +462,7 @@ public class Lab4 extends GameApplication {
 
         // Тип істоти (ChoiceBox з enum)
         ChoiceBox<typeOfMicroObject> typeChoice = new ChoiceBox<>();
-        typeChoice.getItems().addAll(typeOfMicroObject.RECRUIT, typeOfMicroObject.SOLDIER, typeOfMicroObject.CULTIST);
+        typeChoice.getItems().addAll(typeOfMicroObject.values());
         typeChoice.setValue(typeOfMicroObject.RECRUIT);
         grid.add(new Label("Тип:"), 0, 3);
         grid.add(typeChoice, 1, 3);
@@ -900,7 +900,7 @@ public class Lab4 extends GameApplication {
     // Ініціалізація фізики
     protected void initPhysics() {
         //Додавання колізій між макроОбєктом і мікроОбєктом
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.MACROOBJECT, EntityType.ENEMY) {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.MACROOBJECT, EntityType.MICROOBJECT) {
 
             @Override
             protected void onCollision(Entity macroObject, Entity microObject) {

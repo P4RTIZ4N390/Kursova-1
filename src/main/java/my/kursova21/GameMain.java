@@ -61,7 +61,7 @@ public class GameMain extends GameApplication {
 
     @Override
     protected void initPhysics() {
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER_BULLET, EntityType.ENEMY) {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER_BULLET, EntityType.MICROOBJECT) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity enemy) {
 
