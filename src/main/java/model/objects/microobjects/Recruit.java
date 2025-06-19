@@ -4,6 +4,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
+import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import javafx.geometry.Point2D;
 import model.items.firearms.ammos.Ammo762mm;
@@ -131,7 +132,6 @@ public class Recruit extends MicroObjectAbstract {//рекрут
     @Override
     public void onAdded() {
         super.onAdded();
-        entity.addComponent(new EnemyAIComponent());
     }
 
     @Override

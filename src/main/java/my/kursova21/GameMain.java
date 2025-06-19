@@ -12,7 +12,6 @@ import com.almasb.fxgl.physics.PhysicsWorld;
 import model.objects.EntityType;
 import model.Player;
 import model.objects.microobjects.MicroObjectAbstract;
-import model.objects.microobjects.MicroObjectsFactory;
 import model.objects.nanoobjects.NanoObjectsFactory;
 import model.objects.nanoobjects.bullets.Bullet;
 
@@ -43,7 +42,7 @@ public class GameMain extends GameApplication {
     @Override
     protected void initGame() {
         createBorders();
-        getGameWorld().addEntityFactory(new MicroObjectsFactory()); // Реєструємо фабрику
+        // Реєструємо фабрику
         getGameWorld().addEntityFactory(new NanoObjectsFactory());
         MicroObjectAbstract player = spawn("Player", 200, 200).getComponent(Player.class);
         spawn("Recruit",300, 500);

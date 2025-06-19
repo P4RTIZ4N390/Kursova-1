@@ -4,6 +4,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
+import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import javafx.geometry.Point2D;
 import model.items.firearms.ammos.Ammo57mm;
@@ -138,10 +139,11 @@ public class Cultist extends Soldier {//Окультист
     public Entity getNewEntity() {
         MicroObjectAbstract cultist=this;
         Entity cultistE = FXGL.entityBuilder()
-                .with(cultist) // додаємо Creature
+                .with(cultist)
                 .type(EntityType.MICROOBJECT)
                 .at(getX(),getY())
                 .build();
+
 
         cultistE.getBoundingBoxComponent().addHitBox(new HitBox(
                 new Point2D(0, 0), // Зміщення хитбоксу (всередину спрайта)

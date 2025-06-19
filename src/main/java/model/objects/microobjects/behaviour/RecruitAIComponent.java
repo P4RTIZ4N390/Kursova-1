@@ -5,6 +5,7 @@ import com.almasb.fxgl.entity.component.Component;
 import javafx.geometry.Point2D;
 import javafx.util.Duration;
 import jdk.jfr.Enabled;
+import model.objects.macroobjects.MacroObjectAbstract;
 import model.objects.microobjects.MicroObjectAbstract;
 import utilies.ConsoleHelper;
 
@@ -23,6 +24,9 @@ public class RecruitAIComponent extends Component {
 
     private Point2D moveTarget;
     private MicroObjectAbstract attackTarget;
+
+    private MacroObjectAbstract macroTarget;
+    private boolean macroIsTarget;
 
     private final List<Command> commandsList =new ArrayList<>();
 
@@ -111,7 +115,7 @@ public class RecruitAIComponent extends Component {
             FXGL.runOnce(() -> {
                 moving = false;
                 moveToTarget();
-            }, Duration.seconds(0.15));
+            }, Duration.seconds(0.25));
         }
     }
 
@@ -131,9 +135,14 @@ public class RecruitAIComponent extends Component {
         if (microObjectAbstract.isDead()) return;
         switch (command.commandName()){
             case MOVE ->{
-                moveTarget=command.macroObjectAbstract()!=null?command.macroObjectAbstract().getPosition():null;
-                moveTarget=moveTarget!=null?moveTarget:command.toMove();
-                moveToTarget();
+                if (command.macroObjectAbstract()!=null){
+                    macroTarget = command.macroObjectAbstract();
+                    macroIsTarget = true;
+                    moveToMacroTarget();
+                }else {
+                    moveTarget = moveTarget != null ? moveTarget : command.toMove();
+                    moveToTarget();
+                }
             }
             case ATTACK -> {
                 if (command.microObjectAbstract()==null){
@@ -160,7 +169,65 @@ public class RecruitAIComponent extends Component {
         }
     }
 
+    private void moveToMacroTarget() {
+        if (microObjectAbstract.isInMacroObject() && microObjectAbstract.getMacroObjectAbstract().equals(this.macroTarget)){
+            // Якщо вже біля цілі — припиняємо рух
+            microObjectAbstract.stop();
+            macroTarget = null;
+            commandsList.remove(currentCommand);
+            macroIsTarget = false;
+            currentCommand = null;
+            moving = false;
+            think();
+            return;
+        }
+
+        if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(this.macroTarget) && macroIsTarget) {
+            microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
+            return;
+        }
+
+        if (microObjectAbstract.isDead() || entity==null) return;
+        if (macroTarget != null) {
+
+            moving = true;
+            double x = entity.getX();
+            double y = entity.getY();
+            double tx = macroTarget.getX();
+            double ty = macroTarget.getY();
+
+            double dx = tx - x;
+            double dy = ty - y;
+
+            // Зупиняємо поточний рух, щоб не було зміщення по двох осях
+            microObjectAbstract.stop();
+
+            double threshold = 5.0;
+
+            if (Math.abs(dx) > threshold) {
+                if (dx > 0) {
+                    microObjectAbstract.moveRight();
+                } else {
+                    microObjectAbstract.moveLeft();
+                }
+            } else if (Math.abs(dy) > threshold) {
+                if (dy > 0) {
+                    microObjectAbstract.moveDown();
+                } else {
+                    microObjectAbstract.moveUp();
+                }
+            }
+
+            // Запланувати перевірку через деякий час
+            FXGL.runOnce(() -> {
+                moving = false;
+                moveToMacroTarget();
+            }, Duration.seconds(0.15));
+        }
+    }
+
     public void addCommand(Command command){
+        if (commandsList.contains(command)) return;
         commandsList.add(command);
     }
 
@@ -248,8 +315,33 @@ public class RecruitAIComponent extends Component {
             currentCommand = null;
             attackTarget=null;
             moveTarget=null;
+            macroIsTarget=false;
             return true;
         }
         return false;
+    }
+
+    public boolean isMoving() {
+        return moving;
+    }
+
+    public void setMoving(boolean moving) {
+        this.moving = moving;
+    }
+
+    public MacroObjectAbstract getMacroTarget() {
+        return macroTarget;
+    }
+
+    public void setMacroTarget(MacroObjectAbstract macroTarget) {
+        this.macroTarget = macroTarget;
+    }
+
+    public boolean isMacroIsTarget() {
+        return macroIsTarget;
+    }
+
+    public void setMacroIsTarget(boolean macroIsTarget) {
+        this.macroIsTarget = macroIsTarget;
     }
 }

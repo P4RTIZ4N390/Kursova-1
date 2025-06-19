@@ -5,6 +5,8 @@ import model.objects.macroobjects.MacroObjectAbstract;
 import model.objects.microobjects.MicroObjectAbstract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public record Command(Commands commandName,
                MacroObjectAbstract macroObjectAbstract,
                MicroObjectAbstract microObjectAbstract ,
@@ -29,5 +31,17 @@ public record Command(Commands commandName,
     @Override
     public int compareTo(@NotNull Command o) {
         return Short.compare(o.priority, priority);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Command command = (Command) o;
+        return priority() == command.priority() && Objects.equals(toMove(), command.toMove()) && commandName() == command.commandName() && Objects.equals(macroObjectAbstract(), command.macroObjectAbstract()) && Objects.equals(microObjectAbstract(), command.microObjectAbstract());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commandName(), macroObjectAbstract(), microObjectAbstract(), toMove(), priority());
     }
 }

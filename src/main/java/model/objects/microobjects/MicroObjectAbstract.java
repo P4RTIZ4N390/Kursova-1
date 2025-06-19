@@ -66,7 +66,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     private Direction direction=Direction.RIGHT;
     protected Label nameLabel;
 
-    protected PhysicsComponent physics=new PhysicsComponent();
+    protected PhysicsComponent physics;
     protected RecruitAIComponent behaviourComponent=addBehaviour();
 
     public MicroObjectAbstract(String creatureName, int health, double armor, Inventory inventory, double experiencePoint, int x, int y, int speed, EntityType type) {//true constructor
@@ -215,6 +215,10 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         this.direction = direction;
     }
 
+    public RecruitAIComponent getBehaviourComponent() {
+        return behaviourComponent;
+    }
+
     public boolean isDead() {
         return health <= 0;
     }
@@ -234,16 +238,17 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     @Override
     public void onAdded() {
         super.onAdded();
+        physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
         entity.addComponent(new TriggerComponent(RADIUS));
         entity.addComponent(new CollidableComponent(true));
-        entity.addComponent(physics);
         entity.getViewComponent().clearChildren();
         loadAnimatedTexture();
         entity.getViewComponent().addChild(mainTexture);// або твоя текстура істоти
         updateItem();
         entity.addComponent(behaviourComponent);
         entity.getViewComponent().addChild(weaponTexture);
+        entity.addComponent(physics);
     }
 
     public abstract String toString();
@@ -291,7 +296,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     }
 
     public void moveDown() {
-        if (y>=MAX_HEIGHT-50){
+        if (y>=MAX_HEIGHT+50){
             stopPhysic();
             return;
         }

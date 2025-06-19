@@ -94,6 +94,14 @@ public class Lab5 extends Lab4 {
                 super.onActionBegin();
             }
         }, KeyCode.S, InputModifier.CTRL);
+
+        input.addAction(new UserAction("Work with AllMicroObjects") {
+            @Override
+            protected void onActionBegin() {
+                workWithSearchResult(getListMicroObjectLongNameView(FXCollections.observableList(getAllMicroObjectsToWork())));
+                super.onActionBegin();
+            }
+        },KeyCode.A);
     }
 
     private List<MicroObjectAbstract> searchDialogWithParametersAndResult() {
@@ -137,7 +145,7 @@ public class Lab5 extends Lab4 {
 
         Optional<ButtonType> result = dialog.showAndWait();
 
-        if (result.get() == ButtonType.CANCEL) {
+        if (result.get().getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
             return new ArrayList<>();
         }
 
@@ -227,26 +235,7 @@ public class Lab5 extends Lab4 {
             return new ArrayList<>();
         }
 
-        List<MicroObjectAbstract> allMicroObjects = new ArrayList<>(FXGL.getGameWorld().getEntities()
-                .stream()
-                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
-                .filter(MicroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MicroObjectAbstract
-                .map(MicroObjectAbstract.class::cast)
-                .toList());
-
-        List<MacroObjectAbstract> allMacroObjects = FXGL.getGameWorld().getEntities()
-                .stream()
-                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
-                .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
-                .map(MacroObjectAbstract.class::cast)
-                .toList();
-
-        List<MicroObjectAbstract> microObjectAbstractsInMacroObjects = new ArrayList<>();
-        allMacroObjects.forEach(macroObjectAbstract -> microObjectAbstractsInMacroObjects.addAll(macroObjectAbstract.getCreatures()));
-
-        allMicroObjects.addAll(microObjectAbstractsInMacroObjects);
+        List<MicroObjectAbstract> allMicroObjects = getAllMicroObjectsToWork();
 
         switch (typeChoice.getValue()) {
             case CAVE -> allMicroObjects = allMicroObjects.stream()
@@ -269,6 +258,34 @@ public class Lab5 extends Lab4 {
         }
         return allMicroObjects;
     }
+
+    private List<MicroObjectAbstract> getAllMicroObjectsToWork() {
+
+        List<MicroObjectAbstract> allMicroObjects = new ArrayList<>(FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MicroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MicroObjectAbstract
+                .map(MicroObjectAbstract.class::cast)
+                .toList());
+
+        List<MacroObjectAbstract> allMacroObjects = FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
+                .map(MacroObjectAbstract.class::cast)
+                .toList();
+
+        List<MicroObjectAbstract> microObjectAbstractsInMacroObjects = new ArrayList<>();
+        allMacroObjects.forEach(macroObjectAbstract -> microObjectAbstractsInMacroObjects.addAll(macroObjectAbstract.getCreatures()));
+
+        allMicroObjects.addAll(microObjectAbstractsInMacroObjects);
+
+        return allMicroObjects;
+    }
+
+
 
     private void workWithSearchResult(ListView<MicroObjectAbstract> microObjectListView) {
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -632,6 +649,8 @@ public class Lab5 extends Lab4 {
 
         Spinner<Integer> xSpinner = new Spinner<>(0, WIDTH, xPos.get());
         Spinner<Integer> ySpinner = new Spinner<>(0, HEIGHT, yPos.get());
+        xSpinner.setEditable(true);
+        ySpinner.setEditable(true);
         // Функція, яка малює в dynamicBox потрібні контролери
         Runnable rebuild = () -> {
             xPos.set(xSpinner.getValue());

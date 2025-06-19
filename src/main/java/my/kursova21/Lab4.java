@@ -8,6 +8,7 @@ import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.physics.*;
+import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -24,12 +25,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import model.TriggerComponent;
 import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.microobjects.*;
 import model.objects.macroobjects.*;
+import model.objects.microobjects.behaviour.Command;
 import model.objects.nanoobjects.NanoObjectsFactory;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -78,7 +81,7 @@ public class Lab4 extends GameApplication {
     protected void initGame() {
         initPhysics();
         FXGL.getGameScene().setCursor(Cursor.DEFAULT);
-        getGameWorld().addEntityFactory(new MicroObjectsFactory());// Реєструємо фабрику МікроОбєктів
+        // Реєструємо фабрику МікроОбєктів
         getGameWorld().addEntityFactory(new NanoObjectsFactory());// Реєструємо фабрику наноОбєктів
         getGameWorld().addEntityFactory(new MacroObjectFactory());// Реєструємо фабрику МакроОбєктів
         spawn("Crypt", 1000, 800);
@@ -901,7 +904,6 @@ public class Lab4 extends GameApplication {
     protected void initPhysics() {
         //Додавання колізій між макроОбєктом і мікроОбєктом
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.MACROOBJECT, EntityType.MICROOBJECT) {
-
             @Override
             protected void onCollision(Entity macroObject, Entity microObject) {
                 MicroObjectAbstract microObjectComponent = microObject.getComponents().stream()
@@ -916,10 +918,21 @@ public class Lab4 extends GameApplication {
                         .orElse(null);// Отримуємо макроОбєкт з entity
                 // Перевірка на null
                 if (microObjectComponent == null || macroObjectComponent == null) return;
+
+                if (microObjectComponent.getBehaviourComponent().isMacroIsTarget())
+                    if (microObjectComponent.getBehaviourComponent().getMacroTarget().equals(macroObjectComponent)) {
+                        macroObjectComponent.addCreature(microObjectComponent);
+                        microObject.removeFromWorld();
+                        return;
+                    }else {
+                        microObjectComponent.addCommand(Command.getMoveToCommand(new Point2D(microObjectComponent.getX()-20,microObjectComponent.getY()+150),Short.MAX_VALUE));
+                        return;
+                    }
                 // Додавання мікрОбєкт до макроОбєкта
                 macroObjectComponent.addCreature(microObjectComponent);
                 // Видаляємо entity зі світу (ніби він зайшов в макроОбєкт)
                 microObject.removeFromWorld();
+
                 // Вивід повідомлення, про додавання в макроОбєкт
                 ConsoleHelper.writeMessageInLabelInRightCorner(microObjectComponent + " увійшов в " + macroObjectComponent, 8,WIDTH,HEIGHT);
             }
