@@ -6,6 +6,8 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
+import com.almasb.fxgl.pathfinding.CellState;
+import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.physics.CollisionHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,14 +24,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import model.TriggerComponent;
 import model.objects.EntityType;
 import model.objects.macroobjects.*;
 import model.objects.microobjects.*;
-import model.objects.microobjects.behaviour.Command;
-import model.objects.microobjects.behaviour.Commands;
+import model.objects.microobjects.behaviour.Task;
+import model.objects.microobjects.behaviour.TypeOfTask;
+import model.objects.microobjects.behaviour.RecruitAIComponent;
 import model.objects.nanoobjects.bullets.Bullet;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -54,6 +58,7 @@ public class Lab5 extends Lab4 {
     @Override
     protected void initGame() {
         super.initGame();
+
         Recruit recruit = new Recruit(0, 0);
         Entity entity = recruit.getNewEntity();
         //   FXGL.getGameWorld().addEntity(entity);
@@ -63,7 +68,8 @@ public class Lab5 extends Lab4 {
         Cultist cultist = new Cultist(0, 0);
         Entity entity2 = cultist.getNewEntity();
         FXGL.getGameWorld().addEntity(entity2);
-        //recruit.addCommand(Command.getAttackCommand(soldier, (short) 5));
+        //recruit.addCommand(Command.getAttackTask(soldier, (short) 5));
+        drawDebugGrid(RecruitAIComponent.aStarGrid,16);
     }
 
     @Override
@@ -259,7 +265,7 @@ public class Lab5 extends Lab4 {
         return allMicroObjects;
     }
 
-    private List<MicroObjectAbstract> getAllMicroObjectsToWork() {
+    protected static List<MicroObjectAbstract> getAllMicroObjectsToWork() {
 
         List<MicroObjectAbstract> allMicroObjects = new ArrayList<>(FXGL.getGameWorld().getEntities()
                 .stream()
@@ -311,7 +317,7 @@ public class Lab5 extends Lab4 {
         Button sortBtn = new Button("Сортувати за критеріям");
         sortBtn.setOnAction(e -> sortByCriteriaDialog(microObjectListView));
 
-        Button addTaskBtn = callDialogForAddCommand(microObjectListView); // вже готова кнопка
+        Button addTaskBtn = callDialogForAddTask(microObjectListView); // вже готова кнопка
 
         HBox bottomButtons = new HBox(10, sortBtn, addTaskBtn);
         bottomButtons.setAlignment(Pos.CENTER_RIGHT);
@@ -592,11 +598,11 @@ public class Lab5 extends Lab4 {
         super.initPhysics();
     }
 
-    protected Button callDialogForAddCommand(ListView<MicroObjectAbstract> microObjectListView) {
+    protected Button callDialogForAddTask(ListView<MicroObjectAbstract> microObjectListView) {
         Button addButton = new Button("Додати завдання");
         addButton.setOnAction(e -> {
             try {
-                createAddCommandDialog(microObjectListView.getSelectionModel().getSelectedItem(), microObjectListView);
+                createAddTaskDialog(microObjectListView.getSelectionModel().getSelectedItem(), microObjectListView);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -604,7 +610,7 @@ public class Lab5 extends Lab4 {
         return addButton;
     }
 
-    protected void createAddCommandDialog(@NotNull MicroObjectAbstract microObjectAbstract, ListView<MicroObjectAbstract> microObjectListView) {
+    protected static void createAddTaskDialog(@NotNull MicroObjectAbstract microObjectAbstract, ListView<MicroObjectAbstract> microObjectListView) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Додати завдання для " + microObjectAbstract);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -614,8 +620,8 @@ public class Lab5 extends Lab4 {
         grid.setVgap(10);
         grid.setPadding(new Insets(15));
 
-        ChoiceBox<Commands> choice = new ChoiceBox<>(FXCollections.observableArrayList(Commands.values()));
-        choice.setValue(Commands.MOVE);
+        ChoiceBox<TypeOfTask> choice = new ChoiceBox<>(FXCollections.observableArrayList(TypeOfTask.values()));
+        choice.setValue(TypeOfTask.MOVE);
         grid.add(new Label("Тип завдання:"), 0, 0);
         grid.add(choice, 1, 0);
 
@@ -689,13 +695,49 @@ public class Lab5 extends Lab4 {
         short priorityValue =Short.parseShort(String.valueOf(priority.getValue()));
 
         switch (choice.getValue()) {
-            case MOVE -> microObjectAbstract.addCommand(Command.getMoveToCommand(new Point2D(xSpinner.getValue(),ySpinner.getValue()),priorityValue));
+            case MOVE -> microObjectAbstract.addTask(Task.getMoveToTask(new Point2D(xSpinner.getValue(),ySpinner.getValue()),priorityValue));
 
-            case ATTACK -> microObjectAbstract.addCommand(Command.getAttackCommand(attackLv.getSelectionModel().getSelectedItem(), priorityValue));
+            case ATTACK -> microObjectAbstract.addTask(Task.getAttackTask(attackLv.getSelectionModel().getSelectedItem(), priorityValue));
 
-            case DEFENSE -> microObjectAbstract.addCommand(Command.getDefenseCommand(attackLv.getSelectionModel().getSelectedItem(),priorityValue));
+            case DEFENSE -> microObjectAbstract.addTask(Task.getDefenseTask(attackLv.getSelectionModel().getSelectedItem(),priorityValue));
 
-            case MOVE_TO_MACROOBJECT -> microObjectAbstract.addCommand(Command.getMoveToMacroObjectCommand(macroObjectAbstractListView.getSelectionModel().getSelectedItem(),priorityValue));
+            case MOVE_TO_MACROOBJECT -> microObjectAbstract.addTask(Task.getMoveToMacroObjectTask(macroObjectAbstractListView.getSelectionModel().getSelectedItem(),priorityValue));
+        }
+    }
+
+    /**
+     * Накладає візуалізацію сітки на екран.
+     *
+     * @param grid     – твоя AStarGrid
+     * @param cellSize – розмір клітинки в пікселях
+     */
+    public void drawDebugGrid(AStarGrid grid, int cellSize) {
+        int cols = grid.getWidth();   // кількість клітин по X
+        int rows = grid.getHeight();  // кількість клітин по Y
+
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                CellState state = grid.get(x, y).getState();
+
+                Rectangle rect = new Rectangle(cellSize, cellSize);
+                // рамка
+                rect.setStroke(Color.color(1, 1, 1, 0.2));
+                rect.setStrokeWidth(1);
+
+                // заповнення залежно від стану
+                if (state == CellState.WALKABLE) {
+                    rect.setFill(Color.color(0, 1, 0, 0.1));  // прозорий зелений
+                } else {
+                    rect.setFill(Color.color(1, 0, 0, 0.1));  // прозорий червоний
+                }
+
+                // ставимо в правильну позицію
+                rect.setTranslateX(x * cellSize);
+                rect.setTranslateY(y * cellSize);
+
+                // додаємо у UI шар сцени
+                FXGL.getGameScene().addUINode(rect);
+            }
         }
     }
 }

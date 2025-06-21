@@ -4,15 +4,13 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
-import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import javafx.geometry.Point2D;
 import model.items.firearms.ammos.Ammo762mm;
 import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
-import model.objects.microobjects.behaviour.Command;
-import model.objects.microobjects.behaviour.EnemyAIComponent;
+import model.objects.microobjects.behaviour.Task;
 import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
@@ -61,7 +59,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
 
     public void getDamage(int damage,MicroObjectAbstract microObjectAbstract) {//Отримати шкоди, детальніше в Soldier
        getDamage(damage);
-       addCommand(Command.getDefenseCommand(microObjectAbstract,Short.MAX_VALUE));
+       addTask(Task.getDefenseTask(microObjectAbstract,Short.MAX_VALUE));
     }
 
 

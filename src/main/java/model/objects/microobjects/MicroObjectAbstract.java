@@ -19,7 +19,7 @@ import model.items.firearms.Gun;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.macroobjects.MacroObjectAbstract;
-import model.objects.microobjects.behaviour.Command;
+import model.objects.microobjects.behaviour.Task;
 import model.objects.microobjects.behaviour.RecruitAIComponent;
 import my.kursova21.Lab4;
 import org.jetbrains.annotations.NotNull;
@@ -266,40 +266,24 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     }
 
     public void moveRight() {
-        if (x>=MAX_WIDTH-10){
-            stopPhysic();
-            return;
-        }
         direction=Direction.RIGHT;
         updateItem();
         physics.setVelocityX(speed);
     }
 
     public void moveLeft() {
-        if (x<=10){
-            stopPhysic();
-            return;
-        }
         direction=Direction.LEFT;
         updateItem();
         physics.setVelocityX(-speed);
     }
 
     public void moveUp() {
-        if (y<=5){
-            stopPhysic();
-            return;
-        }
         direction=Direction.UP;
         updateItem();
         physics.setVelocityY(-speed);
     }
 
     public void moveDown() {
-        if (y>=MAX_HEIGHT+50){
-            stopPhysic();
-            return;
-        }
         direction=Direction.DOWN;
         updateItem();
         physics.setVelocityY(speed);
@@ -457,8 +441,8 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
         return new Point2D(getX(), getY());
     }
 
-    public void addCommand(Command command){
-        behaviourComponent.addCommand(command);
+    public void addTask(Task task){
+        behaviourComponent.addTask(task);
     }
 
     public boolean checkForAmmo(){

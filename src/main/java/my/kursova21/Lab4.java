@@ -8,13 +8,13 @@ import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.InputModifier;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.physics.*;
-import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -25,14 +25,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 import model.TriggerComponent;
 import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.microobjects.*;
 import model.objects.macroobjects.*;
-import model.objects.microobjects.behaviour.Command;
 import model.objects.nanoobjects.NanoObjectsFactory;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -46,6 +44,7 @@ import java.util.function.Consumer;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameWorld;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
+import static my.kursova21.Lab5.*;
 import static utilies.ConsoleHelper.font;
 import static utilies.ConsoleHelper.smallFont;
 
@@ -637,6 +636,21 @@ public class Lab4 extends GameApplication {
         dialog.setX(position.getX());
         dialog.setY(position.getY());
 
+        Button addTaskBtn =  new Button("Додати завдання");
+        addTaskBtn.setOnAction(e -> {
+            try {
+                createAddTaskDialog(microObjectAbstract,getListMicroObjectLongNameView(FXCollections.observableList(getAllMicroObjectsToWork())));
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        });
+
+
+        HBox bottomButtons = new HBox(10,addTaskBtn);
+        bottomButtons.setAlignment(Pos.CENTER_RIGHT);
+        grid.add(bottomButtons, 0, 7,2,1); // на всю ширину
+
+
         // Встановлюємо макет
         dialog.getDialogPane().setContent(grid);
 
@@ -755,9 +769,11 @@ public class Lab4 extends GameApplication {
             dialog.setY(position.getY());
         }
 
+
+
+
         // Встановлюємо макет
         dialog.getDialogPane().setContent(grid);
-
         // Обробка результату діалогу
 
         Optional<ButtonType> result = dialog.showAndWait();
@@ -903,6 +919,7 @@ public class Lab4 extends GameApplication {
     // Ініціалізація фізики
     protected void initPhysics() {
         //Додавання колізій між макроОбєктом і мікроОбєктом
+        FXGL.getPhysicsWorld().setGravity(0,0);
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.MACROOBJECT, EntityType.MICROOBJECT) {
             @Override
             protected void onCollision(Entity macroObject, Entity microObject) {
@@ -919,22 +936,20 @@ public class Lab4 extends GameApplication {
                 // Перевірка на null
                 if (microObjectComponent == null || macroObjectComponent == null) return;
 
-                if (microObjectComponent.getBehaviourComponent().isMacroIsTarget())
+                if (microObjectComponent.getBehaviourComponent().isMacroIsTarget()) {
                     if (microObjectComponent.getBehaviourComponent().getMacroTarget().equals(macroObjectComponent)) {
                         macroObjectComponent.addCreature(microObjectComponent);
                         microObject.removeFromWorld();
                         return;
-                    }else {
-                        microObjectComponent.addCommand(Command.getMoveToCommand(new Point2D(microObjectComponent.getX()-20,microObjectComponent.getY()+150),Short.MAX_VALUE));
-                        return;
                     }
+                }
                 // Додавання мікрОбєкт до макроОбєкта
                 macroObjectComponent.addCreature(microObjectComponent);
                 // Видаляємо entity зі світу (ніби він зайшов в макроОбєкт)
                 microObject.removeFromWorld();
 
                 // Вивід повідомлення, про додавання в макроОбєкт
-                ConsoleHelper.writeMessageInLabelInRightCorner(microObjectComponent + " увійшов в " + macroObjectComponent, 8,WIDTH,HEIGHT);
+                ConsoleHelper.writeMessageInLabelInRightCorner(microObjectComponent + " увійшов в " + macroObjectComponent, 8, WIDTH, HEIGHT);
             }
         });
     }
