@@ -1,0 +1,9 @@
+<Soldier>
+  <creatureName>Soldier</creatureName>
+  <health>150</health>
+  <armor>45.0</armor>
+  <experiencePoint>76.21</experiencePoint>
+  <x>800</x>
+  <y>20</y>
+  <active>false</active>
+</Soldier>

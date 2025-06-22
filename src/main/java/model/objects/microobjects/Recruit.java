@@ -1,21 +1,29 @@
 package model.objects.microobjects;
 
-import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.texture.AnimatedTexture;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import javafx.geometry.Point2D;
 import model.items.firearms.ammos.Ammo762mm;
 import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.microobjects.behaviour.Task;
-import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
+
+import java.io.FileReader;
+import java.io.FileWriter;
 
 public class Recruit extends MicroObjectAbstract {//рекрут
 
@@ -161,5 +169,68 @@ public class Recruit extends MicroObjectAbstract {//рекрут
 
     public double getInventoryMax(){
         return this.getInventory().getMaxWeight();
+    }
+
+    public void writeToXML(String filePath) throws Exception {
+        XStream xstream = new XStream(new DomDriver());
+        xstream.registerConverter(new RecruitConverter());
+        xstream.alias("Recruit", Recruit.class);
+        xstream.toXML(this, new FileWriter(filePath));
+    }
+
+    public static Recruit readFromXML(String filePath) throws Exception {
+        XStream xstream = new XStream(new DomDriver());
+        xstream.allowTypes(new Class[]{Recruit.class});
+        xstream.registerConverter(new RecruitConverter());
+        xstream.alias("Recruit", Recruit.class);
+        return (Recruit) xstream.fromXML(new FileReader(filePath));
+    }
+
+    static class RecruitConverter implements Converter {
+        @Override
+        public boolean canConvert(Class type) {
+            return type.equals(Recruit.class);
+        }
+
+        @Override
+        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+            Recruit soldier = (Recruit) source;
+            addNode(writer, "creatureName", soldier.getCreatureName());
+            addNode(writer, "health", String.valueOf(soldier.getHealth()));
+            addNode(writer, "armor", String.valueOf(soldier.getArmor()));
+            addNode(writer, "experiencePoint", String.valueOf(soldier.getExperiencePoint()));
+            addNode(writer, "x", String.valueOf(soldier.getX()));
+            addNode(writer, "y", String.valueOf(soldier.getY()));
+            addNode(writer, "active", String.valueOf(soldier.isActive()));
+        }
+
+        private void addNode(HierarchicalStreamWriter writer, String name, String value) {
+            if (value != null) {
+                writer.startNode(name);
+                writer.setValue(value);
+                writer.endNode();
+            }
+        }
+
+        @Override
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+            Recruit soldier = new Recruit();
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                String nodeName = reader.getNodeName();
+                String value = reader.getValue();
+                switch (nodeName) {
+                    case "creatureName" -> soldier.setCreatureName(value);
+                    case "health" -> soldier.setHealth(Integer.parseInt(value));
+                    case "armor" -> soldier.setArmor(Double.parseDouble(value));
+                    case "experiencePoint" -> soldier.setExperiencePoint(Double.parseDouble(value));
+                    case "x" -> soldier.setX(Integer.parseInt(value));
+                    case "y" -> soldier.setY(Integer.parseInt(value));
+                    case "active" -> soldier.setActive(Boolean.parseBoolean(value));
+                }
+                reader.moveUp();
+            }
+            return soldier;
+        }
     }
 }
