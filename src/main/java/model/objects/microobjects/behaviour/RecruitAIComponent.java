@@ -1,5 +1,6 @@
 package model.objects.microobjects.behaviour;
 
+import com.almasb.fxgl.core.collection.grid.Grid;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
@@ -31,7 +32,7 @@ public class RecruitAIComponent extends Component {
 
 
     public static AStarGrid aStarGrid ;
-        private static  AStarPathfinder<AStarCell> pf;
+    private static  AStarPathfinder<AStarCell> pf;
 
     private final double threshold=16;
     private final static int CELL_SIZE=16;
@@ -40,6 +41,7 @@ public class RecruitAIComponent extends Component {
     private boolean moving = false;
     private boolean firing = false;
 
+    private AStarGrid gridForMacroObject;
 
     private Point2D moveTarget;
     private Point2D lastMoveTarget;
@@ -68,17 +70,7 @@ public class RecruitAIComponent extends Component {
                     return CellState.NOT_WALKABLE;
                 }
                 return  CellState.WALKABLE;});
-            List<MacroObjectAbstract> allMacroObjects = FXGL.getGameWorld().getEntities()
-                    .stream()
-                    .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
-                    .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
-                    .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
-                    .map(MacroObjectAbstract.class::cast)
-                    .toList();
-            for (MacroObjectAbstract macroObjectAbstract : allMacroObjects) {
-                BoundingBoxComponent boundingBox=macroObjectAbstract.getEntity().getBoundingBoxComponent();
-                PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),2,CELL_SIZE);
-            }
+            blockMacroObjects();
             pf = new AStarPathfinder<>(aStarGrid);
         }
     }
@@ -159,7 +151,7 @@ public class RecruitAIComponent extends Component {
     }
 
     private void moveToMacroTarget() {
-        if (microObjectAbstract.isInMacroObject() && microObjectAbstract.getMacroObjectAbstract().equals(this.macroTarget)) {
+        if ((microObjectAbstract.isInMacroObject() && microObjectAbstract.getMacroObjectAbstract().equals(this.macroTarget))) {
             // Якщо вже біля цілі — припиняємо рух
             microObjectAbstract.stop();
             macroTarget = null;
@@ -173,44 +165,53 @@ public class RecruitAIComponent extends Component {
 
         if (microObjectAbstract.isInMacroObject() && !microObjectAbstract.getMacroObjectAbstract().equals(this.macroTarget) && macroIsTarget) {
             microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
+            microObjectAbstract.stop();
+            computePathToMacroTarget(macroTarget);
             return;
         }
 
-        if (microObjectAbstract.isDead() || entity == null) return;
-        if (macroTarget != null) {
-
-            moving = true;
-            double x = entity.getX();
-            double y = entity.getY();
-            double tx = macroTarget.getX();
-            double ty = macroTarget.getY();
-
-            double dx = tx - x;
-            double dy = ty - y;
-
-            // Зупиняємо поточний рух, щоб не було зміщення по двох осях
-            microObjectAbstract.stop();
-
-            if (Math.abs(dx) > threshold) {
-                if (dx > 0) {
-                    microObjectAbstract.moveRight();
-                } else {
-                    microObjectAbstract.moveLeft();
-                }
-            } else if (Math.abs(dy) > threshold) {
-                if (dy > 0) {
-                    microObjectAbstract.moveDown();
-                } else {
-                    microObjectAbstract.moveUp();
-                }
-            }
-
-            // Запланувати перевірку через деякий час
-            FXGL.runOnce(() -> {
-                moving = false;
-                moveToMacroTarget();
-            }, Duration.seconds(0.15));
+        if (microObjectAbstract.isDead() || entity == null){
+            ConsoleHelper.isNull(entity);
+            entity=microObjectAbstract.getEntity();
+            return;
         }
+        Point2D entityPos=PathFinder.getHitboxCenter(entity);
+
+        if (macroTarget != null && !microObjectAbstract.isDead() ) {
+            if (currentPath== null||currentPath.isEmpty()) computePathToMacroTarget(macroTarget);
+        }
+
+        if (currentPath == null || pathIndex >= currentPath.size()) {
+            return;
+        }
+
+        AStarCell cell = currentPath.get(pathIndex);
+        double cellCenterX = (cell.getX() + 0.5) * CELL_SIZE;
+        double cellCenterY = (cell.getY() + 0.5) * CELL_SIZE;
+
+        double dx = cellCenterX - entityPos.getX();
+        double dy = cellCenterY - entityPos.getY();
+
+        // Якщо по X вже близько — переходь по Y
+        if (Math.abs(dx) <= threshold) {
+            // Якщо по Y теж близько — ця клітинка пройдена
+            if (Math.abs(dy) <= threshold) {
+                pathIndex++;
+            } else {
+                // рухаємося по Y
+                microObjectAbstract.stop();
+                if (dy > 0) microObjectAbstract.moveDown();
+                else microObjectAbstract.moveUp();
+            }
+        } else {
+            // рухаємося по X
+            microObjectAbstract.stop();
+            if (dx > 0) microObjectAbstract.moveRight();
+            else microObjectAbstract.moveLeft();
+        }
+        FXGL.runOnce(()->{
+            think();
+        }, Duration.seconds(0.75));
     }
 
     public void addTask(Task task) {
@@ -235,13 +236,15 @@ public class RecruitAIComponent extends Component {
     }
 
     public void moveToTarget() {
-        Point2D entityPos=PathFinder.getHitboxCenter(entity);
+
         if (microObjectAbstract.isInMacroObject()) {
             microObjectAbstract.getMacroObjectAbstract().pullCreature(microObjectAbstract);
             return;
         }
 
         if (entity == null) return;
+
+        Point2D entityPos=PathFinder.getHitboxCenter(entity);
 
         if (moveTarget != null && !microObjectAbstract.isDead()) {
             moving = true;
@@ -250,6 +253,7 @@ public class RecruitAIComponent extends Component {
                 double dy = moveTarget.getY() - entityPos.getY();
                 if (Math.abs(dx) <= threshold && Math.abs(dy) <= threshold) {
                     taskList.remove(currentTask);
+                    currentTask = null;
                     resetMovement();
                     return;
                 }
@@ -455,7 +459,35 @@ public class RecruitAIComponent extends Component {
             think();
             return;
         }
-        followPath();
+        moveToAttackTarget();
+    }
+
+    private void computePathToMacroTarget(MacroObjectAbstract macroTarget) {
+        Point2D target=PathFinder.getHitboxCenter(macroTarget.getEntity());
+        Point2D entityPos=PathFinder.getHitboxCenter(entity);
+
+        AStarGrid grid = AStarGrid.fromWorld(FXGL.getGameWorld(),Lab4.WIDTH/CELL_SIZE, Lab5.HEIGHT/CELL_SIZE,CELL_SIZE,CELL_SIZE, type -> CellState.WALKABLE);
+
+        blockMacroObjects(macroTarget, grid);
+
+        AStarPathfinder<AStarCell> pathfinder=new AStarPathfinder<>(grid);
+        try {
+            currentPath = pathfinder.findPath((int) entityPos.getX()/CELL_SIZE, (int) entityPos.getY()/CELL_SIZE, (int) target.getX()/CELL_SIZE, (int) target.getY()/CELL_SIZE);
+        }catch (Exception e){
+            if (e instanceof ArrayIndexOutOfBoundsException){
+                currentPath=null;
+            }
+            else throw (RuntimeException) e;
+        }
+        pathIndex = 0;
+        if (currentPath == null || currentPath.isEmpty()) {
+            think();
+            return;
+        }
+
+        drawDebugPath(currentPath);
+
+        moveToMacroTarget();
     }
 
     private static void drawDebugPath(List<AStarCell> cells) {
@@ -472,5 +504,36 @@ public class RecruitAIComponent extends Component {
         int x = (int) (point.getX() / CELL_SIZE);
         int y = (int) (point.getY() / CELL_SIZE);
         return new Point2D((x + 0.5) * CELL_SIZE, (y + 0.5) * CELL_SIZE);
+    }
+
+    private static void blockMacroObjects(){
+        List<MacroObjectAbstract> allMacroObjects = FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
+                .map(MacroObjectAbstract.class::cast)
+                .toList();
+        for (MacroObjectAbstract macroObjectAbstract : allMacroObjects) {
+            BoundingBoxComponent boundingBox=macroObjectAbstract.getEntity().getBoundingBoxComponent();
+            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),2,CELL_SIZE);
+        }
+    }
+
+    private static void blockMacroObjects(MacroObjectAbstract macroObjectAbstract,AStarGrid aStarGrid){
+        List<MacroObjectAbstract> allMacroObjects = new ArrayList<>(FXGL.getGameWorld().getEntities()
+                .stream()
+                .filter(e -> e.getComponentOptional(TriggerComponent.class).isPresent()) // Шукаємо тригерні об'єкти
+                .flatMap(e -> e.getComponents().stream())                                // Розгортаємо всі компоненти кожної сутності
+                .filter(MacroObjectAbstract.class::isInstance)                            // Фільтруємо лише ті, що є MacroObjectAbstract
+                .map(MacroObjectAbstract.class::cast)
+                .toList());
+
+        if (!allMacroObjects.remove(macroObjectAbstract)) ConsoleHelper.writeMessage("Не знайдено елемент для видалення. 529 ");
+
+        for (MacroObjectAbstract macroObjectAbstract1 : allMacroObjects) {
+            BoundingBoxComponent boundingBox=macroObjectAbstract1.getEntity().getBoundingBoxComponent();
+            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),2,CELL_SIZE);
+        }
     }
 }

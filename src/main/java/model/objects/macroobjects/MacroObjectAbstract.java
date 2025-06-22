@@ -58,12 +58,12 @@ public abstract class MacroObjectAbstract extends Component {
 
     public void pullCreature(int index) {
         MicroObjectAbstract microObjectAbstract = microObjectAbstracts.get(index);
-        microObjectAbstracts.remove(index);
         FXGL.getGameScene().removeUINode(sizeOfCreatures);
         sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
         if (!microObjectAbstracts.isEmpty())  FXGL.getGameScene().addUINode(sizeOfCreatures);
         FXGL.getGameWorld().addEntity(microObjectAbstract.getNewEntity());
         microObjectAbstract.getPhysics().overwritePosition(new Point2D(x+64, y-89));
+        microObjectAbstracts.remove(index);
     }
 
     public void pullCreature(MicroObjectAbstract microObjectAbstract) {

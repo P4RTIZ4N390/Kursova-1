@@ -153,7 +153,7 @@ public class Recruit extends MicroObjectAbstract {//рекрут
         ));
 
         enableLabelPrimitiveView(entity);
-
+        entity=recruitE;
         return recruitE;
     }
 
