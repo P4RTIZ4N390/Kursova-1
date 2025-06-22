@@ -1,4 +1,5 @@
 module my.kursova21 {
+
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -15,8 +16,11 @@ module my.kursova21 {
     requires org.slf4j;
     requires java.desktop;
     requires java.naming;
+    requires xstream;
+
 
     opens my.kursova21 to javafx.fxml;
+    opens model.objects.microobjects to xstream;
     exports model.objects.microobjects to com.almasb.fxgl.core;
     exports model.objects.macroobjects to com.almasb.fxgl.core;
     exports model.objects.nanoobjects to com.almasb.fxgl.core;

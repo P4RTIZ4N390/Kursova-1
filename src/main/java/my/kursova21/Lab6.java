@@ -6,19 +6,15 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.IrremovableComponent;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.UserAction;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import model.TriggerComponent;
 import model.objects.macroobjects.MacroObjectAbstract;
-import model.objects.microobjects.MicroObjectAbstract;
-import model.objects.microobjects.behaviour.RecruitAIComponent;
+import model.objects.microobjects.*;
 import model.objects.minimap.MiniMap;
 import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
@@ -27,6 +23,7 @@ import utilies.ImageLoader;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
@@ -105,6 +102,23 @@ public class Lab6 extends Lab5 {
                 super.onActionBegin();
             }
         }, KeyCode.L);
+
+        input.addAction(new UserAction("Load object") {
+            @Override
+            protected void onActionBegin() {
+                loadMicroObject();
+                super.onActionBegin();
+            }
+        }, KeyCode.I);
+
+        input.addAction(new UserAction("Count mana users") {
+            @Override
+            protected void onActionBegin() {
+                super.onActionBegin();
+                countManaUsers();
+            }
+        }, KeyCode.O);
+
         input.addAction(new UserAction("Object on screen") {
             @Override
             protected void onActionBegin() {
@@ -113,6 +127,13 @@ public class Lab6 extends Lab5 {
             }
         }, KeyCode.U);
 
+        input.addAction(new UserAction("Active entity on screen") {
+            @Override
+            protected void onActionBegin() {
+                countActiveEntityOnScreen();
+                super.onActionBegin();
+            }
+        }, KeyCode.U);
     }
 
     @Override
@@ -147,30 +168,95 @@ public class Lab6 extends Lab5 {
 
         // Додаємо кнопки "Пошук" і "Скасувати"
         dialog.getDialogPane().getButtonTypes().addAll(
-                new ButtonType("Пошук", ButtonBar.ButtonData.YES),
+                new ButtonType("Зберегти", ButtonBar.ButtonData.YES),
                 new ButtonType("Скасувати", ButtonBar.ButtonData.CANCEL_CLOSE)
         );
 
         // Створюємо вміст діалогу
         VBox content = new VBox(10);
-        Label macroLabel = new Label("Назва макрооб’єкта:");
-        TextField macroField = new TextField();
+
         Label fileLabel = new Label("Обраний файл:");
         TextField filePathField = new TextField();
         filePathField.setEditable(false); // Поле лише для відображення
-        Button chooseFileButton = getButton(filePathField);
+        Button chooseFileButton = getButtonForFileSearch(filePathField);
 
-        content.getChildren().addAll(macroLabel, macroField, fileLabel, filePathField, chooseFileButton);
+        content.getChildren().addAll(fileLabel, filePathField, chooseFileButton);
         dialog.getDialogPane().setContent(content);
 
         // Прив’язуємо діалог до Stage гри
         dialog.initOwner(FXGL.getPrimaryStage());
 
         Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) return;
+
+        String filePath = filePathField.getText();
+
+        if (filePath.isEmpty()) return;
+
+        try {
+            microObject.writeToXML(filePath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void loadMicroObject() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Завантажити об'єкт");
+
+        // Додаємо кнопки "Завантажити" і "Скасувати"
+        dialog.getDialogPane().getButtonTypes().addAll(
+                new ButtonType("Завантажити", ButtonBar.ButtonData.YES),
+                new ButtonType("Скасувати", ButtonBar.ButtonData.CANCEL_CLOSE)
+        );
+
+        ChoiceBox<typeOfMicroObject> typeChoice = new ChoiceBox<>();
+        typeChoice.getItems().addAll(typeOfMicroObject.values());
+        typeChoice.setValue(typeOfMicroObject.RECRUIT);
+        Label type=new Label("Тип:");
+
+
+        // Створюємо вміст діалогу
+        VBox content = new VBox(10);
+
+        Label fileLabel = new Label("Обраний файл:");
+        TextField filePathField = new TextField();
+        filePathField.setEditable(false); // Поле лише для відображення
+        Button chooseFileButton = getButtonForFileSearch(filePathField);
+
+        content.getChildren().addAll(type,typeChoice,fileLabel, filePathField, chooseFileButton);
+        dialog.getDialogPane().setContent(content);
+
+        // Прив’язуємо діалог до Stage гри
+        dialog.initOwner(FXGL.getPrimaryStage());
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) return;
+
+        String filePath = filePathField.getText();
+
+        typeOfMicroObject typeOfMicroObject = typeChoice.getValue();
+
+        if (filePath.isEmpty()) return;
+
+        MicroObjectAbstract microObject;
+
+        try {
+            switch (typeOfMicroObject) {
+                case SOLDIER -> microObject= Soldier.readFromXML(filePath);
+                case CULTIST ->  microObject = Cultist.readFromXML(filePath);
+                default -> microObject = Recruit.readFromXML(filePath);
+            }// Зчитуємо об’єкт
+            FXGL.getGameWorld().addEntity(microObject.getNewEntity());// Додаємо до світу гри
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @NotNull
-    private static Button getButton(TextField filePathField) {
+    private static Button getButtonForFileSearch(TextField filePathField) {
         Button chooseFileButton = new Button("Вибрати файл");
 
         // Обробник для кнопки вибору файлу
@@ -178,7 +264,7 @@ public class Lab6 extends Lab5 {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Виберіть файл");
             fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Текстові файли", "*.txt")
+                    new FileChooser.ExtensionFilter("Розши́рювана мо́ва розмі́тки", "*.xml")
             );
             File selectedFile = fileChooser.showOpenDialog(FXGL.getPrimaryStage());
             if (selectedFile != null) {
@@ -209,5 +295,21 @@ public class Lab6 extends Lab5 {
             stringBuilder.append("Кількість мікроОбєктів на екрані:").append(microAmount).append('.');
         }
         ConsoleHelper.writeMessageInLabelInRightCorner(stringBuilder.toString(),10,1920,1080);
+    }
+
+    public void countManaUsers() {
+        int amount=0;
+        List<MicroObjectAbstract> list=getAllMicroObjectsToWork();
+        for (MicroObjectAbstract microObjectAbstract : list) {
+            if (microObjectAbstract instanceof Cultist) amount++;
+        }
+        ConsoleHelper.writeMessageInLabelInRightCorner("Кількість користувачів мани в грі:"+amount,10,1920,1080);
+    }
+
+    public void countActiveEntityOnScreen() {
+        Viewport viewport = FXGL.getGameScene().getViewport();
+        List<Entity> entities=FXGL.getGameWorld().getEntitiesInRange(new Rectangle2D(viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight()));
+        List<MicroObjectAbstract> list=entities.stream().flatMap(entity->entity.getComponents().stream()).filter(MicroObjectAbstract.class::isInstance).map(MicroObjectAbstract.class::cast).filter(MicroObjectAbstract::isActive).toList();
+        ConsoleHelper.writeMessageInLabelInRightCorner("Кількість активних мікроОбєктів на екрані :"+list.size(),10,1920,1080);
     }
 }

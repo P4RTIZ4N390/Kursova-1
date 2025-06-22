@@ -28,8 +28,10 @@ import org.jetbrains.annotations.NotNull;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Random;
 
 import static utilies.ConsoleHelper.smallFont;
 
@@ -53,6 +55,7 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     protected Inventory inventory;//it's a place where keeping items
     private double experiencePoint;//Amount of xp, what player received
     private boolean wasActive = true;
+
     protected final int speed;
 
     private final EntityType type;
@@ -61,12 +64,15 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     private boolean active = false;
 
     private int x;
+
     private int y;
 
     protected AnimatedTexture mainTexture;
     protected AnimatedTexture weaponTexture;
     protected AnimationChannel animIdleRight,animIdleLeft,animIdleDown,animIdleUp,animWalkRight, animWalkLeft, animWalkUp, animWalkDown;
+
     private Direction direction=Direction.RIGHT;
+
     protected Label nameLabel;
 
     protected PhysicsComponent physics;
@@ -454,14 +460,12 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
 
     @Override
     public void write(@NotNull Bundle bundle) {
-
     }
 
     @Override
     public void read(@NotNull Bundle bundle) {
-
     }
 
-
+    public abstract void writeToXML(String s) throws Exception;
 }
 

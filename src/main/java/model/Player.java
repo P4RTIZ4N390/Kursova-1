@@ -27,6 +27,7 @@ import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
+
 import java.util.*;
 
 public class Player extends MicroObjectAbstract {//singleton pattern
@@ -459,6 +460,9 @@ public class Player extends MicroObjectAbstract {//singleton pattern
     public Entity getNewEntity() {
         return getEntity();
     }
+
+    @Override
+    public void writeToXML(String s) throws Exception{}
 
 
     @Override
