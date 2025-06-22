@@ -47,23 +47,17 @@ public abstract class MacroObjectAbstract extends Component {
     public abstract void loadTexture();
 
     public void addCreature(MicroObjectAbstract microObjectAbstract) {
-        if (!microObjectAbstracts.isEmpty()){
-            FXGL.getGameScene().removeUINode(sizeOfCreatures);
-        }
         microObjectAbstracts.add(microObjectAbstract);
         sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
         microObjectAbstract.setMacroObjectAbstract(this);
-        FXGL.getGameScene().addUINode(sizeOfCreatures);
     }
 
     public void pullCreature(int index) {
         MicroObjectAbstract microObjectAbstract = microObjectAbstracts.get(index);
-        FXGL.getGameScene().removeUINode(sizeOfCreatures);
-        sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
-        if (!microObjectAbstracts.isEmpty())  FXGL.getGameScene().addUINode(sizeOfCreatures);
         FXGL.getGameWorld().addEntity(microObjectAbstract.getNewEntity());
-        microObjectAbstract.getPhysics().overwritePosition(new Point2D(x+64, y-89));
+        microObjectAbstract.getPhysics().overwritePosition(new Point2D(x+64, y-125));
         microObjectAbstracts.remove(index);
+        sizeOfCreatures.setText(String.valueOf(microObjectAbstracts.size()));
     }
 
     public void pullCreature(MicroObjectAbstract microObjectAbstract) {
@@ -96,12 +90,11 @@ public abstract class MacroObjectAbstract extends Component {
         super.onAdded();
         sizeOfCreatures.setTextFill(Color.LIGHTGREEN);
         sizeOfCreatures.setFont(font);
-        sizeOfCreatures.setLayoutY(y);
-        sizeOfCreatures.setLayoutX(x);
         physicsComponent.setBodyType(BodyType.STATIC);
         entity.addComponent(new CollidableComponent(true));
         entity.addComponent(physicsComponent);
         entity.addComponent(new TriggerComponent(50));
+        entity.getViewComponent().addChild(sizeOfCreatures);
     }
 
     @Override

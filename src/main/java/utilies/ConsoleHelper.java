@@ -73,7 +73,7 @@ public class ConsoleHelper {
     //Це мій улюблений метод перевірка чи об'єкт дорівнює null
     public static void isNull(Object object){
         if(object == null){
-            System.out.println("Сука ,воно чомусь null.");
+            System.out.println("Воно чомусь null.");
         }
     }
 

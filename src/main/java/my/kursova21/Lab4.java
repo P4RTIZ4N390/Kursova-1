@@ -940,6 +940,7 @@ public class Lab4 extends GameApplication {
                     if (microObjectComponent.getBehaviourComponent().getMacroTarget().equals(macroObjectComponent)) {
                         macroObjectComponent.addCreature(microObjectComponent);
                         microObject.removeFromWorld();
+                        ConsoleHelper.writeMessageInLabelInRightCorner(microObjectComponent + " увійшов в " + macroObjectComponent, 8, WIDTH, HEIGHT);
                         return;
                     }
                 }

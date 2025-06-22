@@ -19,6 +19,7 @@ import model.objects.macroobjects.MacroObjectAbstract;
 import model.objects.microobjects.MicroObjectAbstract;
 import my.kursova21.Lab4;
 import my.kursova21.Lab5;
+import my.kursova21.Lab6;
 import utilies.ConsoleHelper;
 import utilies.PathFinder;
 
@@ -34,8 +35,8 @@ public class RecruitAIComponent extends Component {
     public static AStarGrid aStarGrid ;
     private static  AStarPathfinder<AStarCell> pf;
 
-    private final double threshold=16;
-    private final static int CELL_SIZE=16;
+    private final double threshold=32;
+    private final static int CELL_SIZE=32;
 
     private final MicroObjectAbstract microObjectAbstract;
     private boolean moving = false;
@@ -65,7 +66,7 @@ public class RecruitAIComponent extends Component {
     @Override
     public void onAdded() {
         if (aStarGrid == null) {
-            aStarGrid= AStarGrid.fromWorld(FXGL.getGameWorld(),Lab4.WIDTH/CELL_SIZE, Lab5.HEIGHT/CELL_SIZE,CELL_SIZE,CELL_SIZE, type -> {
+            aStarGrid= AStarGrid.fromWorld(FXGL.getGameWorld(), (int) Lab6.MAP_WIDTH /CELL_SIZE, (int) (Lab6.MAP_HEIGHT/CELL_SIZE),CELL_SIZE,CELL_SIZE, type -> {
                 if (type == EntityType.MACROOBJECT) {
                     return CellState.NOT_WALKABLE;
                 }
@@ -438,8 +439,6 @@ public class RecruitAIComponent extends Component {
             return;
         }
 
-        drawDebugPath(currentPath);
-
         followPath();
     }
 
@@ -485,20 +484,11 @@ public class RecruitAIComponent extends Component {
             return;
         }
 
-        drawDebugPath(currentPath);
+
 
         moveToMacroTarget();
     }
 
-    private static void drawDebugPath(List<AStarCell> cells) {
-        for (AStarCell cell :cells) {
-            Rectangle r = new Rectangle(CELL_SIZE, CELL_SIZE, Color.color(0, 0, 1, 0.3));
-            r.setTranslateX(cell.getX() * CELL_SIZE);
-            r.setTranslateY(cell.getY() * CELL_SIZE);
-            FXGL.getGameScene().addUINode(r);
-        }
-
-    }
 
     public static Point2D toCellCenter(Point2D point) {
         int x = (int) (point.getX() / CELL_SIZE);
@@ -516,7 +506,7 @@ public class RecruitAIComponent extends Component {
                 .toList();
         for (MacroObjectAbstract macroObjectAbstract : allMacroObjects) {
             BoundingBoxComponent boundingBox=macroObjectAbstract.getEntity().getBoundingBoxComponent();
-            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),2,CELL_SIZE);
+            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),1,CELL_SIZE);
         }
     }
 
@@ -533,7 +523,7 @@ public class RecruitAIComponent extends Component {
 
         for (MacroObjectAbstract macroObjectAbstract1 : allMacroObjects) {
             BoundingBoxComponent boundingBox=macroObjectAbstract1.getEntity().getBoundingBoxComponent();
-            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),2,CELL_SIZE);
+            PathFinder.blockInflatedZone(aStarGrid, (int) boundingBox.getMinXWorld(), (int) boundingBox.getMinYWorld(), (int) (boundingBox.getMaxXWorld()-boundingBox.getMinXWorld()), (int) (boundingBox.getMaxYWorld()-boundingBox.getMinYWorld()),1,CELL_SIZE);
         }
     }
 }

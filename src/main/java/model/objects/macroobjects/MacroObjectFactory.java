@@ -32,11 +32,10 @@ public class MacroObjectFactory implements EntityFactory {
         MacroObjectAbstract crypt =new Crypt((int) data.getX(),(int) data.getY());
 
         Entity e = FXGL.entityBuilder(data)
-                .with(crypt)
                 .viewWithBBox(crypt.getTexture())
+                .with(crypt)
                 .type(EntityType.MACROOBJECT)
                 .build();
-
         enableCirclePrimitiveView(e,Color.CYAN);
         return e;
     }
@@ -46,8 +45,8 @@ public class MacroObjectFactory implements EntityFactory {
         MacroObjectAbstract dormitory =new Dormitory((int) data.getX(),(int) data.getY());
 
         Entity e = FXGL.entityBuilder(data)
-                .with(dormitory)
                 .viewWithBBox(dormitory.getTexture())
+                .with(dormitory)
                 .type(EntityType.MACROOBJECT)
                 .build();
 

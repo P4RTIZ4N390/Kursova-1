@@ -69,7 +69,6 @@ public class Lab5 extends Lab4 {
         Entity entity2 = cultist.getNewEntity();
         FXGL.getGameWorld().addEntity(entity2);
         //recruit.addCommand(Command.getAttackTask(soldier, (short) 5));
-        drawDebugGrid(RecruitAIComponent.aStarGrid,16);
     }
 
     @Override
@@ -653,8 +652,8 @@ public class Lab5 extends Lab4 {
 
         grid.setPrefSize(400, 300);
 
-        Spinner<Integer> xSpinner = new Spinner<>(0, WIDTH, xPos.get());
-        Spinner<Integer> ySpinner = new Spinner<>(0, HEIGHT, yPos.get());
+        Spinner<Integer> xSpinner = new Spinner<>(0, Lab6.MAP_WIDTH, xPos.get());
+        Spinner<Integer> ySpinner = new Spinner<>(0, Lab6.MAP_HEIGHT, yPos.get());
         xSpinner.setEditable(true);
         ySpinner.setEditable(true);
         // Функція, яка малює в dynamicBox потрібні контролери
