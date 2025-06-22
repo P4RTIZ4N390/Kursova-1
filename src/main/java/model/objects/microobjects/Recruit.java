@@ -1,5 +1,6 @@
 package model.objects.microobjects;
 
+import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.BoundingShape;
@@ -11,6 +12,7 @@ import model.items.firearms.rifles.AKM;
 import model.items.inventory.Inventory;
 import model.objects.EntityType;
 import model.objects.microobjects.behaviour.Task;
+import org.jetbrains.annotations.NotNull;
 import utilies.ConsoleHelper;
 import utilies.ImageLoader;
 import utilies.RandomUtil;

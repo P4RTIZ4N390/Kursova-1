@@ -1,8 +1,10 @@
 package model.objects.microobjects;
 
+import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.entity.component.SerializableComponent;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.physics.HitBox;
@@ -26,11 +28,12 @@ import org.jetbrains.annotations.NotNull;
 import utilies.ImageLoader;
 import utilies.RandomUtil;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import static utilies.ConsoleHelper.smallFont;
 
-public abstract class MicroObjectAbstract extends Component implements Comparable<MicroObjectAbstract>,Cloneable {
+public abstract class MicroObjectAbstract extends Component implements Comparable<MicroObjectAbstract>,Cloneable, SerializableComponent,Serializable {
 
     public static int MAX_HEIGHT= Lab4.HEIGHT;
     public static int MAX_WIDTH=Lab4.WIDTH;
@@ -448,5 +451,17 @@ public abstract class MicroObjectAbstract extends Component implements Comparabl
     public boolean checkForAmmo(){
         return inventory.checkForItem(getInventory().getCurrentGun().getCaliber());
     }
+
+    @Override
+    public void write(@NotNull Bundle bundle) {
+
+    }
+
+    @Override
+    public void read(@NotNull Bundle bundle) {
+
+    }
+
+
 }
 

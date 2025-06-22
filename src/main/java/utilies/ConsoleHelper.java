@@ -156,7 +156,7 @@ public class ConsoleHelper {
         int size = 0; // Кількість символів у поточному рядку
 
         for (String s : split) {
-            if (s.equals("\n")) size=0;
+            if (s.contains("\n")) size=0;
             if (size >= amountOfSymbols) {
                 // Якщо ліміт символів досягнуто — починаємо новий рядок
                 result.append('\n');
